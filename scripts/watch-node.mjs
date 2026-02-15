@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import process from "node:process";
 
 const args = process.argv.slice(2);
@@ -13,7 +15,13 @@ if (args.length > 0) {
   env.OPENCLAW_WATCH_COMMAND = args.join(" ");
 }
 
-const initialBuild = spawnSync("pnpm", ["exec", compiler], {
+const nodeDir = path.dirname(process.execPath);
+const corepackJsCandidate = path.join(nodeDir, "node_modules", "corepack", "dist", "corepack.js");
+const corepackViaNode = fs.existsSync(corepackJsCandidate);
+const corepackCmd = corepackViaNode ? process.execPath : "corepack";
+const corepackPrefixArgs = corepackViaNode ? [corepackJsCandidate] : [];
+
+const initialBuild = spawnSync(corepackCmd, [...corepackPrefixArgs, "pnpm", "exec", compiler], {
   cwd,
   env,
   stdio: "inherit",
@@ -23,7 +31,7 @@ if (initialBuild.status !== 0) {
   process.exit(initialBuild.status ?? 1);
 }
 
-const compilerProcess = spawn("pnpm", ["exec", compiler, "--watch"], {
+const compilerProcess = spawn(corepackCmd, [...corepackPrefixArgs, "pnpm", "exec", compiler, "--watch"], {
   cwd,
   env,
   stdio: "inherit",

@@ -55,6 +55,9 @@ function run(cmd, args) {
     cwd: uiDir,
     stdio: "inherit",
     env: process.env,
+    // On Windows, `cmd` may resolve to a `.cmd` shim (pnpm.cmd). Node can't spawn those directly
+    // without going through a shell.
+    shell: process.platform === "win32",
   });
   child.on("exit", (code, signal) => {
     if (signal) {
@@ -69,6 +72,7 @@ function runSync(cmd, args, envOverride) {
     cwd: uiDir,
     stdio: "inherit",
     env: envOverride ?? process.env,
+    shell: process.platform === "win32",
   });
   if (result.signal) {
     process.exit(1);

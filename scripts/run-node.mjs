@@ -231,9 +231,16 @@ export async function runNodeMain(params = {}) {
   }
 
   logRunner("Building TypeScript (dist is stale).", deps);
-  const buildCmd = deps.platform === "win32" ? "cmd.exe" : "pnpm";
-  const buildArgs =
-    deps.platform === "win32" ? ["/d", "/s", "/c", "pnpm", ...compilerArgs] : compilerArgs;
+  // On Windows, `pnpm` may not be on PATH. Use Corepack (ships with Node) for consistent behavior
+  // across shells (PowerShell, cmd.exe, Git Bash). Avoid spawning `corepack.cmd` (which requires a
+  // shell) by invoking the underlying JS entrypoint via `node`.
+  const nodeDir = path.dirname(deps.execPath);
+  const corepackJsCandidate = path.join(nodeDir, "node_modules", "corepack", "dist", "corepack.js");
+  const corepackViaNode = deps.fs.existsSync(corepackJsCandidate);
+  const buildCmd = corepackViaNode ? deps.execPath : "corepack";
+  const buildArgs = corepackViaNode
+    ? [corepackJsCandidate, "pnpm", ...compilerArgs]
+    : ["pnpm", ...compilerArgs];
   const build = deps.spawn(buildCmd, buildArgs, {
     cwd: deps.cwd,
     env: deps.env,

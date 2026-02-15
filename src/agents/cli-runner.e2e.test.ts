@@ -31,8 +31,8 @@ describe("runCliAgent resume cleanup", () => {
       }) // cleanupSuspendedCliProcesses (ps) — ppid 999 != selfPid, no match
       .mockResolvedValueOnce({
         stdout: [
-          `  ${selfPid + 1} ${selfPid} codex exec resume thread-123 --color never --sandbox read-only --skip-git-repo-check`,
-          `  ${selfPid + 2} 999 codex exec resume thread-123 --color never --sandbox read-only --skip-git-repo-check`,
+          `  ${selfPid + 1} ${selfPid} codex exec --color never --sandbox read-only --skip-git-repo-check resume thread-123`,
+          `  ${selfPid + 2} 999 codex exec --color never --sandbox read-only --skip-git-repo-check resume thread-123`,
         ].join("\n"),
         stderr: "",
       }) // cleanupResumeProcesses (ps)
@@ -219,8 +219,8 @@ describe("cleanupSuspendedCliProcesses", () => {
     runExecMock
       .mockResolvedValueOnce({
         stdout: [
-          `  50 ${selfPid} T  codex exec resume thread-99 --color never --sandbox read-only`,
-          `  51 ${selfPid} T  codex exec resume other --color never --sandbox read-only`,
+          `  50 ${selfPid} T  codex exec --color never --sandbox read-only resume thread-99`,
+          `  51 ${selfPid} T  codex exec --color never --sandbox read-only resume other`,
         ].join("\n"),
         stderr: "",
       })
@@ -229,7 +229,7 @@ describe("cleanupSuspendedCliProcesses", () => {
     await cleanupSuspendedCliProcesses(
       {
         command: "codex",
-        resumeArgs: ["exec", "resume", "{sessionId}", "--color", "never", "--sandbox", "read-only"],
+        resumeArgs: ["exec", "--color", "never", "--sandbox", "read-only", "resume", "{sessionId}"],
       } as CliBackendConfig,
       1,
     );
