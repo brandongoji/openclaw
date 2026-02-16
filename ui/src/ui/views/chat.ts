@@ -447,6 +447,14 @@ export function renderChat(props: ChatProps) {
                   ? "Moonshine…"
                   : "Start transcription 🎤"}
             </button>
+            <span
+              class="pill ${props.moonshineRecording ? "ok" : "warn"}"
+              title=${props.moonshineRecording
+                ? "Live transcription is active"
+                : "Live transcription is idle"}
+            >
+              ${props.moonshineRecording ? "LIVE" : "IDLE"}
+            </span>
             <button
               class="btn primary"
               ?disabled=${!props.connected}
