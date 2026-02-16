@@ -453,16 +453,21 @@ export function renderChat(props: ChatProps) {
               </div>
             </details>
             <button
-              class="btn ${props.moonshineRecording ? "active" : ""}"
+              class="btn btn--icon ${props.moonshineRecording ? "active" : ""}"
               ?disabled=${!props.connected || (props.moonshineBusy === true && !props.moonshineRecording)}
               @click=${() => props.onMoonshineTranscribe?.()}
-              title="Start/stop Moonshine live transcription into the chat box"
-            >
-              ${props.moonshineRecording
-                ? "Stop transcription ⏹️"
+              title=${props.moonshineRecording
+                ? "Stop transcription"
                 : props.moonshineBusy
-                  ? "Moonshine…"
-                  : "Start transcription 🎤"}
+                  ? "Processing transcription"
+                  : "Start transcription"}
+              aria-label=${props.moonshineRecording
+                ? "Stop transcription"
+                : props.moonshineBusy
+                  ? "Processing transcription"
+                  : "Start transcription"}
+            >
+              ${icons.radio}
             </button>
             <span
               class="pill ${props.moonshineBusy ? "warn" : props.moonshineRecording ? "ok" : ""}"
