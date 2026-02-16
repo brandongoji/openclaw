@@ -149,7 +149,18 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 async function captureMicWavBase64(maxMs = 7000): Promise<string> {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error("microphone API unavailable in this browser context");
+  }
+
+  let stream: MediaStream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    const e = err as { name?: string; message?: string };
+    throw new Error(`mic permission/capture failed (${e?.name ?? "unknown"}: ${e?.message ?? String(err)})`);
+  }
+
   const audioContext = new AudioContext({ sampleRate: 16000 });
   const source = audioContext.createMediaStreamSource(stream);
   const processor = audioContext.createScriptProcessor(4096, 1, 1);
@@ -171,6 +182,9 @@ async function captureMicWavBase64(maxMs = 7000): Promise<string> {
   await audioContext.close();
 
   const total = chunks.reduce((sum, c) => sum + c.length, 0);
+  if (total < 1024) {
+    throw new Error("no audio captured (silence/device blocked)");
+  }
   const merged = new Float32Array(total);
   let at = 0;
   for (const c of chunks) {
@@ -553,7 +567,9 @@ export class OpenClawApp extends LitElement {
       }
       this.chatMessage = this.chatMessage.trim().length > 0 ? `${this.chatMessage} ${text}` : text;
     } catch (err) {
-      this.lastError = `Moonshine failed: ${String(err)}`;
+      const msg = err instanceof Error ? err.message : String(err);
+      this.lastError = `Moonshine failed: ${msg}`;
+      console.error("moonshine-debug", { model: this.moonshineModel, error: err });
     } finally {
       this.moonshineBusy = false;
     }
