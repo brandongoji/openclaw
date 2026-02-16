@@ -423,28 +423,35 @@ export function renderChat(props: ChatProps) {
             >
               ${canAbort ? "Stop" : "New session"}
             </button>
-            <label class="field" style="min-width: 120px;">
-              <span>Moonshine</span>
-              <select
-                .value=${props.moonshineModel ?? "whisper-base"}
-                ?disabled=${!props.connected || props.moonshineBusy === true}
-                @change=${(e: Event) =>
-                  props.onMoonshineModelChange?.(
-                    ((e.target as HTMLSelectElement).value as
-                      | "tiny"
-                      | "base"
-                      | "whisper-tiny"
-                      | "whisper-base"
-                      | "whisper-large") ?? "whisper-large",
-                  )}
-              >
-                <option value="whisper-large">whisper-large (local best)</option>
-                <option value="whisper-base">whisper-base (local)</option>
-                <option value="whisper-tiny">whisper-tiny (local)</option>
-                <option value="base">moonshine-base</option>
-                <option value="tiny">moonshine-tiny</option>
-              </select>
-            </label>
+            <details class="stt-menu">
+              <summary class="btn btn--icon" title="Transcriber settings">
+                ${icons.settings}
+              </summary>
+              <div class="stt-menu__panel">
+                <label class="field stt-menu__field">
+                  <span>Transcriber model</span>
+                  <select
+                    .value=${props.moonshineModel ?? "whisper-base"}
+                    ?disabled=${!props.connected || props.moonshineBusy === true}
+                    @change=${(e: Event) =>
+                      props.onMoonshineModelChange?.(
+                        ((e.target as HTMLSelectElement).value as
+                          | "tiny"
+                          | "base"
+                          | "whisper-tiny"
+                          | "whisper-base"
+                          | "whisper-large") ?? "whisper-base",
+                      )}
+                  >
+                    <option value="whisper-large">whisper-large (local best)</option>
+                    <option value="whisper-base">whisper-base (local)</option>
+                    <option value="whisper-tiny">whisper-tiny (local)</option>
+                    <option value="base">moonshine-base</option>
+                    <option value="tiny">moonshine-tiny</option>
+                  </select>
+                </label>
+              </div>
+            </details>
             <button
               class="btn ${props.moonshineRecording ? "active" : ""}"
               ?disabled=${!props.connected || (props.moonshineBusy === true && !props.moonshineRecording)}
@@ -458,12 +465,14 @@ export function renderChat(props: ChatProps) {
                   : "Start transcription 🎤"}
             </button>
             <span
-              class="pill ${props.moonshineRecording ? "ok" : "warn"}"
-              title=${props.moonshineRecording
-                ? "Live transcription is active"
-                : "Live transcription is idle"}
+              class="pill ${props.moonshineBusy ? "warn" : props.moonshineRecording ? "ok" : ""}"
+              title=${props.moonshineBusy
+                ? "Audio is being processed"
+                : props.moonshineRecording
+                  ? "Live transcription is active"
+                  : "Live transcription is idle"}
             >
-              ${props.moonshineRecording ? "LIVE" : "IDLE"}
+              ${props.moonshineBusy ? "PROCESSING…" : props.moonshineRecording ? "LIVE" : "IDLE"}
             </span>
             <button
               class="btn primary"
