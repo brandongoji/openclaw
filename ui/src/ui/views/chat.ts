@@ -72,6 +72,10 @@ export type ChatProps = {
 };
 
 const COMPACTION_TOAST_DURATION_MS = 5000;
+const MOONSHINE_MAX_LISTEN_MS = 7000;
+const MOONSHINE_COOLDOWN_MS = 1000;
+let moonshineActive = false;
+let moonshineLastStartAt = 0;
 
 function adjustTextareaHeight(el: HTMLTextAreaElement) {
   el.style.height = "auto";
@@ -80,6 +84,11 @@ function adjustTextareaHeight(el: HTMLTextAreaElement) {
 
 async function startMoonshineDictation(props: ChatProps) {
   if (!props.connected) {
+    return;
+  }
+
+  const now = Date.now();
+  if (moonshineActive || now - moonshineLastStartAt < MOONSHINE_COOLDOWN_MS) {
     return;
   }
 
@@ -106,36 +115,60 @@ async function startMoonshineDictation(props: ChatProps) {
   const recognition = new RecognitionCtor();
   recognition.lang = "en-US";
   recognition.continuous = false;
-  recognition.interimResults = true;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  moonshineActive = true;
+  moonshineLastStartAt = now;
 
   const baseDraft = props.draft;
+  let gotTranscript = false;
+  const stopTimer = window.setTimeout(() => {
+    try {
+      recognition.stop();
+    } catch {
+      // ignore
+    }
+  }, MOONSHINE_MAX_LISTEN_MS);
 
   recognition.onresult = (event: any) => {
     let finalText = "";
-    let interimText = "";
 
     for (let i = 0; i < event.results.length; i += 1) {
       const result = event.results[i];
       const transcript = result?.[0]?.transcript ?? "";
       if (result.isFinal) {
         finalText += transcript;
-      } else {
-        interimText += transcript;
       }
     }
 
-    const transcript = `${finalText}${interimText}`.trim();
+    const transcript = finalText.trim();
     if (!transcript) {
       return;
     }
 
+    gotTranscript = true;
     const separator = baseDraft.trim().length > 0 ? " " : "";
     props.onDraftChange(`${baseDraft}${separator}${transcript}`.trimStart());
   };
 
   recognition.onerror = (event: any) => {
-    const code = event?.error ? ` (${event.error})` : "";
-    alert(`Moonshine dictation failed${code}.`);
+    const code = String(event?.error ?? "").toLowerCase();
+    // "aborted" and "no-speech" happen often in browsers; don't spam alerts.
+    if (code === "aborted" || code === "no-speech") {
+      return;
+    }
+    const detail = code ? ` (${code})` : "";
+    alert(`Moonshine dictation failed${detail}.`);
+  };
+
+  recognition.onend = () => {
+    window.clearTimeout(stopTimer);
+    moonshineActive = false;
+    if (!gotTranscript) {
+      // Keep feedback light; no modal alert here to avoid interrupting flow.
+      console.info("Moonshine ended without transcript.");
+    }
   };
 
   recognition.start();
