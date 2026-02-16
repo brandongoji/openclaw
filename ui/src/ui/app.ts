@@ -705,6 +705,12 @@ export class OpenClawApp extends LitElement {
     if (!this.moonshineRecording || this.moonshineLiveInFlight || token !== this.moonshineSessionToken) {
       return;
     }
+
+    // Option A: for Whisper models, defer transcription until stop (final-only).
+    if (this.moonshineModel.startsWith("whisper-")) {
+      return;
+    }
+
     const capture = this.moonshineCapture;
     if (!capture) {
       return;
