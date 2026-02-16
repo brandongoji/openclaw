@@ -78,6 +78,59 @@ function adjustTextareaHeight(el: HTMLTextAreaElement) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
+function startMoonshineDictation(props: ChatProps) {
+  if (!props.connected) {
+    return;
+  }
+
+  const win = window as Window & {
+    SpeechRecognition?: new () => any;
+    webkitSpeechRecognition?: new () => any;
+  };
+
+  const RecognitionCtor = win.SpeechRecognition ?? win.webkitSpeechRecognition;
+  if (!RecognitionCtor) {
+    console.warn("Moonshine dictation unavailable: SpeechRecognition not supported in this browser.");
+    return;
+  }
+
+  const recognition = new RecognitionCtor();
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  const baseDraft = props.draft;
+
+  recognition.onresult = (event: any) => {
+    let finalText = "";
+    let interimText = "";
+
+    for (let i = 0; i < event.results.length; i += 1) {
+      const result = event.results[i];
+      const transcript = result?.[0]?.transcript ?? "";
+      if (result.isFinal) {
+        finalText += transcript;
+      } else {
+        interimText += transcript;
+      }
+    }
+
+    const transcript = `${finalText}${interimText}`.trim();
+    if (!transcript) {
+      return;
+    }
+
+    const separator = baseDraft.trim().length > 0 ? " " : "";
+    props.onDraftChange(`${baseDraft}${separator}${transcript}`.trimStart());
+  };
+
+  recognition.onerror = () => {
+    // Silent fail: keep chat flow uninterrupted.
+  };
+
+  recognition.start();
+}
+
 function renderCompactionIndicator(status: CompactionIndicatorStatus | null | undefined) {
   if (!status) {
     return nothing;
@@ -412,6 +465,14 @@ export function renderChat(props: ChatProps) {
               @click=${canAbort ? props.onAbort : props.onNewSession}
             >
               ${canAbort ? "Stop" : "New session"}
+            </button>
+            <button
+              class="btn"
+              ?disabled=${!props.connected}
+              @click=${() => startMoonshineDictation(props)}
+              title="Moonshine voice input"
+            >
+              Moonshine 🎤
             </button>
             <button
               class="btn primary"
