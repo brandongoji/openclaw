@@ -471,7 +471,7 @@ export function renderChat(props: ChatProps) {
                   ? "Processing transcription"
                   : "Start transcription"}
             >
-              ${props.moonshineRecording ? icons.x : icons.radio}
+              ${icons.radio}
             </button>
             <span
               class="pill ${props.moonshineBusy ? "warn" : props.moonshineRecording ? "ok" : ""}"
