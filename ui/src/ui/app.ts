@@ -102,6 +102,86 @@ function resolveOnboardingMode(): boolean {
   return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
 }
 
+function encodeWavPcm16Mono(samples: Float32Array, sampleRate: number): ArrayBuffer {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  const writeString = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i += 1) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+
+  writeString(0, "RIFF");
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeString(8, "WAVE");
+  writeString(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, "data");
+  view.setUint32(40, samples.length * 2, true);
+
+  let offset = 44;
+  for (let i = 0; i < samples.length; i += 1) {
+    const s = Math.max(-1, Math.min(1, samples[i] ?? 0));
+    const int16 = s < 0 ? s * 0x8000 : s * 0x7fff;
+    view.setInt16(offset, int16, true);
+    offset += 2;
+  }
+
+  return buffer;
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    const slice = bytes.subarray(i, i + chunk);
+    binary += String.fromCharCode(...slice);
+  }
+  return btoa(binary);
+}
+
+async function captureMicWavBase64(maxMs = 7000): Promise<string> {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const audioContext = new AudioContext({ sampleRate: 16000 });
+  const source = audioContext.createMediaStreamSource(stream);
+  const processor = audioContext.createScriptProcessor(4096, 1, 1);
+  const chunks: Float32Array[] = [];
+
+  processor.onaudioprocess = (event: AudioProcessingEvent) => {
+    const input = event.inputBuffer.getChannelData(0);
+    chunks.push(new Float32Array(input));
+  };
+
+  source.connect(processor);
+  processor.connect(audioContext.destination);
+
+  await new Promise<void>((resolve) => window.setTimeout(resolve, maxMs));
+
+  processor.disconnect();
+  source.disconnect();
+  stream.getTracks().forEach((t) => t.stop());
+  await audioContext.close();
+
+  const total = chunks.reduce((sum, c) => sum + c.length, 0);
+  const merged = new Float32Array(total);
+  let at = 0;
+  for (const c of chunks) {
+    merged.set(c, at);
+    at += c.length;
+  }
+
+  const wav = encodeWavPcm16Mono(merged, 16000);
+  return arrayBufferToBase64(wav);
+}
+
 @customElement("openclaw-app")
 export class OpenClawApp extends LitElement {
   @state() settings: UiSettings = loadSettings();
@@ -126,6 +206,8 @@ export class OpenClawApp extends LitElement {
   @state() chatLoading = false;
   @state() chatSending = false;
   @state() chatMessage = "";
+  @state() moonshineModel: "tiny" | "base" = "tiny";
+  @state() moonshineBusy = false;
   @state() chatMessages: unknown[] = [];
   @state() chatToolMessages: unknown[] = [];
   @state() chatStream: string | null = null;
@@ -449,6 +531,32 @@ export class OpenClawApp extends LitElement {
       messageOverride,
       opts,
     );
+  }
+
+  async handleMoonshineTranscribe() {
+    if (!this.connected || !this.client || this.moonshineBusy) {
+      return;
+    }
+    this.moonshineBusy = true;
+    try {
+      const audioBase64 = await captureMicWavBase64(6500);
+      const res = (await this.client.request("moonshine.transcribe", {
+        audioBase64,
+        model: this.moonshineModel,
+        language: "en",
+        maxSeconds: 15,
+      })) as { text?: string };
+      const text = (res?.text ?? "").trim();
+      if (!text) {
+        this.lastError = "Moonshine completed but no speech was detected.";
+        return;
+      }
+      this.chatMessage = this.chatMessage.trim().length > 0 ? `${this.chatMessage} ${text}` : text;
+    } catch (err) {
+      this.lastError = `Moonshine failed: ${String(err)}`;
+    } finally {
+      this.moonshineBusy = false;
+    }
   }
 
   async handleWhatsAppStart(force: boolean) {

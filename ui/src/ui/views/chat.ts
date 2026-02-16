@@ -61,6 +61,10 @@ export type ChatProps = {
   onRefresh: () => void;
   onToggleFocusMode: () => void;
   onDraftChange: (next: string) => void;
+  onMoonshineModelChange?: (next: "tiny" | "base") => void;
+  onMoonshineTranscribe?: () => void;
+  moonshineModel?: "tiny" | "base";
+  moonshineBusy?: boolean;
   onSend: () => void;
   onAbort?: () => void;
   onQueueRemove: (id: string) => void;
@@ -72,106 +76,10 @@ export type ChatProps = {
 };
 
 const COMPACTION_TOAST_DURATION_MS = 5000;
-const MOONSHINE_MAX_LISTEN_MS = 7000;
-const MOONSHINE_COOLDOWN_MS = 1000;
-let moonshineActive = false;
-let moonshineLastStartAt = 0;
 
 function adjustTextareaHeight(el: HTMLTextAreaElement) {
   el.style.height = "auto";
   el.style.height = `${el.scrollHeight}px`;
-}
-
-async function startMoonshineDictation(props: ChatProps) {
-  if (!props.connected) {
-    return;
-  }
-
-  const now = Date.now();
-  if (moonshineActive || now - moonshineLastStartAt < MOONSHINE_COOLDOWN_MS) {
-    return;
-  }
-
-  const win = window as Window & {
-    SpeechRecognition?: new () => any;
-    webkitSpeechRecognition?: new () => any;
-  };
-
-  const RecognitionCtor = win.SpeechRecognition ?? win.webkitSpeechRecognition;
-  if (!RecognitionCtor) {
-    alert("Moonshine mic is not supported in this browser. Try Chrome/Edge, or use local Whisper file transcription.");
-    return;
-  }
-
-  try {
-    // Force permission prompt early so failures are visible.
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach((track) => track.stop());
-  } catch {
-    alert("Microphone permission is blocked. Allow mic access for 127.0.0.1 in your browser site settings, then try again.");
-    return;
-  }
-
-  const recognition = new RecognitionCtor();
-  recognition.lang = "en-US";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  moonshineActive = true;
-  moonshineLastStartAt = now;
-
-  const baseDraft = props.draft;
-  let gotTranscript = false;
-  const stopTimer = window.setTimeout(() => {
-    try {
-      recognition.stop();
-    } catch {
-      // ignore
-    }
-  }, MOONSHINE_MAX_LISTEN_MS);
-
-  recognition.onresult = (event: any) => {
-    let finalText = "";
-
-    for (let i = 0; i < event.results.length; i += 1) {
-      const result = event.results[i];
-      const transcript = result?.[0]?.transcript ?? "";
-      if (result.isFinal) {
-        finalText += transcript;
-      }
-    }
-
-    const transcript = finalText.trim();
-    if (!transcript) {
-      return;
-    }
-
-    gotTranscript = true;
-    const separator = baseDraft.trim().length > 0 ? " " : "";
-    props.onDraftChange(`${baseDraft}${separator}${transcript}`.trimStart());
-  };
-
-  recognition.onerror = (event: any) => {
-    const code = String(event?.error ?? "").toLowerCase();
-    // "aborted" and "no-speech" happen often in browsers; don't spam alerts.
-    if (code === "aborted" || code === "no-speech") {
-      return;
-    }
-    const detail = code ? ` (${code})` : "";
-    alert(`Moonshine dictation failed${detail}.`);
-  };
-
-  recognition.onend = () => {
-    window.clearTimeout(stopTimer);
-    moonshineActive = false;
-    if (!gotTranscript) {
-      // Keep feedback light; no modal alert here to avoid interrupting flow.
-      console.info("Moonshine ended without transcript.");
-    }
-  };
-
-  recognition.start();
 }
 
 function renderCompactionIndicator(status: CompactionIndicatorStatus | null | undefined) {
@@ -509,13 +417,27 @@ export function renderChat(props: ChatProps) {
             >
               ${canAbort ? "Stop" : "New session"}
             </button>
+            <label class="field" style="min-width: 120px;">
+              <span>Moonshine</span>
+              <select
+                .value=${props.moonshineModel ?? "tiny"}
+                ?disabled=${!props.connected || props.moonshineBusy === true}
+                @change=${(e: Event) =>
+                  props.onMoonshineModelChange?.(
+                    ((e.target as HTMLSelectElement).value as "tiny" | "base") ?? "tiny",
+                  )}
+              >
+                <option value="tiny">tiny</option>
+                <option value="base">base</option>
+              </select>
+            </label>
             <button
               class="btn"
-              ?disabled=${!props.connected}
-              @click=${() => void startMoonshineDictation(props)}
-              title="Moonshine voice input"
+              ?disabled=${!props.connected || props.moonshineBusy === true}
+              @click=${() => props.onMoonshineTranscribe?.()}
+              title="Moonshine local transcription"
             >
-              Moonshine 🎤
+              ${props.moonshineBusy ? "Moonshine…" : "Moonshine 🎤"}
             </button>
             <button
               class="btn primary"
