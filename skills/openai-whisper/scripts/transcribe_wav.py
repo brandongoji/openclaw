@@ -67,7 +67,18 @@ def main() -> int:
 
     try:
         model = whisper.load_model(args.model)
-        result = model.transcribe(args.input, language=args.language)
+        result = model.transcribe(
+            args.input,
+            language=args.language,
+            fp16=False,
+            temperature=0,
+            best_of=5,
+            beam_size=5,
+            condition_on_previous_text=True,
+            compression_ratio_threshold=2.4,
+            logprob_threshold=-1.0,
+            no_speech_threshold=0.5,
+        )
         text = (result.get("text") or "").strip()
         print(text)
         return 0
