@@ -78,7 +78,7 @@ function adjustTextareaHeight(el: HTMLTextAreaElement) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
-function startMoonshineDictation(props: ChatProps) {
+async function startMoonshineDictation(props: ChatProps) {
   if (!props.connected) {
     return;
   }
@@ -90,7 +90,16 @@ function startMoonshineDictation(props: ChatProps) {
 
   const RecognitionCtor = win.SpeechRecognition ?? win.webkitSpeechRecognition;
   if (!RecognitionCtor) {
-    console.warn("Moonshine dictation unavailable: SpeechRecognition not supported in this browser.");
+    alert("Moonshine mic is not supported in this browser. Try Chrome/Edge, or use local Whisper file transcription.");
+    return;
+  }
+
+  try {
+    // Force permission prompt early so failures are visible.
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach((track) => track.stop());
+  } catch {
+    alert("Microphone permission is blocked. Allow mic access for 127.0.0.1 in your browser site settings, then try again.");
     return;
   }
 
@@ -124,8 +133,9 @@ function startMoonshineDictation(props: ChatProps) {
     props.onDraftChange(`${baseDraft}${separator}${transcript}`.trimStart());
   };
 
-  recognition.onerror = () => {
-    // Silent fail: keep chat flow uninterrupted.
+  recognition.onerror = (event: any) => {
+    const code = event?.error ? ` (${event.error})` : "";
+    alert(`Moonshine dictation failed${code}.`);
   };
 
   recognition.start();
@@ -469,7 +479,7 @@ export function renderChat(props: ChatProps) {
             <button
               class="btn"
               ?disabled=${!props.connected}
-              @click=${() => startMoonshineDictation(props)}
+              @click=${() => void startMoonshineDictation(props)}
               title="Moonshine voice input"
             >
               Moonshine 🎤
