@@ -1,0 +1,25 @@
+{
+  "phase": "phase1",
+  "capturedAt": "2026-02-16T01:39:22.015Z",
+  "openclawVersion": "2026.2.15",
+  "mitigations": {
+    "maxConcurrent": 1,
+    "subagentsMaxConcurrent": 1,
+    "fallbacksCleared": true
+  },
+  "agentsDefaults": {
+    "primary": "google/gemini-3-flash-preview",
+    "fallbacks": []
+  },
+  "gatewayRestart": {
+    "method": "manual",
+    "reason": "gateway service missing on Windows (Scheduled Task not installed)"
+  },
+  "verification": {
+    "command": "openclaw agent --local --session-id phase1-test --message hi --thinking off --json",
+    "result": "rate_limit",
+    "provider": "google",
+    "model": "gemini-3-flash-preview",
+    "message": "API rate limit reached"
+  }
+}
