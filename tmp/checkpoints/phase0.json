@@ -1,0 +1,18 @@
+{
+  "phase": "phase0",
+  "capturedAt": "2026-02-16T01:33:30.440Z",
+  "openclawVersion": "2026.2.15",
+  "source": {
+    "kind": "config-backup",
+    "path": "~/.openclaw/openclaw.json.bak.3"
+  },
+  "agentsDefaults": {
+    "primary": "google/gemini-3-flash-preview",
+    "fallbacks": [
+      "openai/gpt-5.1-codex",
+      "openai/gpt-4.1-mini"
+    ],
+    "maxConcurrent": 4,
+    "subagentsMaxConcurrent": 8
+  }
+}
