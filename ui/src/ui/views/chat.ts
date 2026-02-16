@@ -438,33 +438,14 @@ export function renderChat(props: ChatProps) {
             <button
               class="btn ${props.moonshineRecording ? "active" : ""}"
               ?disabled=${!props.connected || (props.moonshineBusy === true && !props.moonshineRecording)}
-              @pointerdown=${(e: PointerEvent) => {
-                e.preventDefault();
-                const target = e.currentTarget as HTMLElement | null;
-                try {
-                  target?.setPointerCapture(e.pointerId);
-                } catch {
-                  // pointer capture best-effort only
-                }
-                void props.onMoonshinePTTStart?.();
-              }}
-              @pointerup=${(e: PointerEvent) => {
-                e.preventDefault();
-                const target = e.currentTarget as HTMLElement | null;
-                if (target?.hasPointerCapture(e.pointerId)) {
-                  target.releasePointerCapture(e.pointerId);
-                }
-                void props.onMoonshinePTTStop?.();
-              }}
-              @pointercancel=${() => void props.onMoonshinePTTCancel?.()}
-              @click=${(e: Event) => e.preventDefault()}
-              title="Hold to talk with Moonshine local transcription"
+              @click=${() => props.onMoonshineTranscribe?.()}
+              title="Start/stop Moonshine live transcription into the chat box"
             >
               ${props.moonshineRecording
-                ? "Release to send 🎙️"
+                ? "Stop transcription ⏹️"
                 : props.moonshineBusy
                   ? "Moonshine…"
-                  : "Hold to talk 🎤"}
+                  : "Start transcription 🎤"}
             </button>
             <button
               class="btn primary"
