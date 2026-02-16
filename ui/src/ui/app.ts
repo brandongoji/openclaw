@@ -269,7 +269,7 @@ export class OpenClawApp extends LitElement {
   @state() chatLoading = false;
   @state() chatSending = false;
   @state() chatMessage = "";
-  @state() moonshineModel: "tiny" | "base" = "base";
+  @state() moonshineModel: "tiny" | "base" | "whisper-1" = "whisper-1";
   @state() moonshineBusy = false;
   @state() moonshineRecording = false;
   private moonshineCapture: MicCaptureSession | null = null;
@@ -615,7 +615,8 @@ export class OpenClawApp extends LitElement {
     }
     this.moonshineBusy = true;
     try {
-      const res = (await this.client.request("moonshine.transcribe", {
+      const useWhisper = this.moonshineModel === "whisper-1";
+      const res = (await this.client.request(useWhisper ? "whisper.transcribe" : "moonshine.transcribe", {
         audioBase64,
         model: this.moonshineModel,
         language: "en",

@@ -91,6 +91,7 @@ const BASE_METHODS = [
   "chat.abort",
   "chat.send",
   "moonshine.transcribe",
+  "whisper.transcribe",
 ];
 
 export function listGatewayMethods(): string[] {

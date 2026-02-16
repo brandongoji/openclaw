@@ -61,12 +61,12 @@ export type ChatProps = {
   onRefresh: () => void;
   onToggleFocusMode: () => void;
   onDraftChange: (next: string) => void;
-  onMoonshineModelChange?: (next: "tiny" | "base") => void;
+  onMoonshineModelChange?: (next: "tiny" | "base" | "whisper-1") => void;
   onMoonshineTranscribe?: () => void;
   onMoonshinePTTStart?: () => void;
   onMoonshinePTTStop?: () => void;
   onMoonshinePTTCancel?: () => void;
-  moonshineModel?: "tiny" | "base";
+  moonshineModel?: "tiny" | "base" | "whisper-1";
   moonshineBusy?: boolean;
   moonshineRecording?: boolean;
   onSend: () => void;
@@ -424,15 +424,16 @@ export function renderChat(props: ChatProps) {
             <label class="field" style="min-width: 120px;">
               <span>Moonshine</span>
               <select
-                .value=${props.moonshineModel ?? "base"}
+                .value=${props.moonshineModel ?? "whisper-1"}
                 ?disabled=${!props.connected || props.moonshineBusy === true}
                 @change=${(e: Event) =>
                   props.onMoonshineModelChange?.(
-                    ((e.target as HTMLSelectElement).value as "tiny" | "base") ?? "tiny",
+                    ((e.target as HTMLSelectElement).value as "tiny" | "base" | "whisper-1") ?? "whisper-1",
                   )}
               >
-                <option value="tiny">tiny</option>
-                <option value="base">base</option>
+                <option value="whisper-1">whisper-1 (best)</option>
+                <option value="base">moonshine-base</option>
+                <option value="tiny">moonshine-tiny</option>
               </select>
             </label>
             <button

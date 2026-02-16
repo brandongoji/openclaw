@@ -25,6 +25,7 @@ import { updateHandlers } from "./server-methods/update.js";
 import { usageHandlers } from "./server-methods/usage.js";
 import { voicewakeHandlers } from "./server-methods/voicewake.js";
 import { webHandlers } from "./server-methods/web.js";
+import { whisperHandlers } from "./server-methods/whisper.js";
 import { wizardHandlers } from "./server-methods/wizard.js";
 
 const ADMIN_SCOPE = "operator.admin";
@@ -96,6 +97,7 @@ const WRITE_METHODS = new Set([
   "chat.abort",
   "browser.request",
   "moonshine.transcribe",
+  "whisper.transcribe",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
@@ -183,6 +185,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...webHandlers,
   ...modelsHandlers,
   ...moonshineHandlers,
+  ...whisperHandlers,
   ...configHandlers,
   ...wizardHandlers,
   ...talkHandlers,
