@@ -281,6 +281,8 @@ export class OpenClawApp extends LitElement {
   private moonshineLiveTimer: number | null = null;
   private moonshineLiveInFlight = false;
   private moonshineSessionToken = 0;
+  private moonshineLastChunkNorm = "";
+  private moonshineRepeatCount = 0;
   @state() chatMessages: unknown[] = [];
   @state() chatToolMessages: unknown[] = [];
   @state() chatStream: string | null = null;
@@ -615,6 +617,17 @@ export class OpenClawApp extends LitElement {
       return;
     }
 
+    const normalizedChunk = trimmed.toLowerCase().replace(/[\p{P}\p{S}]+/gu, "").trim();
+    if (normalizedChunk && normalizedChunk === this.moonshineLastChunkNorm) {
+      this.moonshineRepeatCount += 1;
+      if (this.moonshineRepeatCount >= 2) {
+        return;
+      }
+    } else {
+      this.moonshineLastChunkNorm = normalizedChunk;
+      this.moonshineRepeatCount = 0;
+    }
+
     const existing = this.chatMessage.trim();
     if (existing.length > 0) {
       // Skip exact repeat chunk
@@ -660,6 +673,10 @@ export class OpenClawApp extends LitElement {
       })) as { text?: string };
 
       if (token !== this.moonshineSessionToken) {
+        return;
+      }
+      // Hard guard: ignore stale live chunks when transcription is no longer recording.
+      if (phase !== "stop" && !this.moonshineRecording) {
         return;
       }
 
@@ -713,6 +730,8 @@ export class OpenClawApp extends LitElement {
     this.lastError = null;
     this.moonshineRecording = true;
     this.moonshineSessionToken += 1;
+    this.moonshineLastChunkNorm = "";
+    this.moonshineRepeatCount = 0;
     const token = this.moonshineSessionToken;
 
     try {
@@ -759,6 +778,8 @@ export class OpenClawApp extends LitElement {
       console.error("moonshine-debug", { model: this.moonshineModel, phase: "stop", error: err });
     } finally {
       this.moonshineLiveInFlight = false;
+      this.moonshineLastChunkNorm = "";
+      this.moonshineRepeatCount = 0;
     }
   }
 
@@ -767,6 +788,8 @@ export class OpenClawApp extends LitElement {
     this.stopMoonshineLiveTimer();
     this.moonshineSessionToken += 1;
     this.moonshineLiveInFlight = false;
+    this.moonshineLastChunkNorm = "";
+    this.moonshineRepeatCount = 0;
 
     const capture = this.moonshineCapture;
     this.moonshineCapture = null;
