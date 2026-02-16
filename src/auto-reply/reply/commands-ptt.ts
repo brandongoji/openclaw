@@ -15,7 +15,6 @@ type NodeSummary = {
 const PTT_COMMANDS: Record<string, string> = {
   start: "talk.ptt.start",
   stop: "talk.ptt.stop",
-  once: "talk.ptt.once",
   cancel: "talk.ptt.cancel",
 };
 
@@ -141,8 +140,9 @@ function parsePTTArgs(commandBody: string) {
 
 function buildPTTHelpText() {
   return [
-    "Usage: /ptt <start|stop|once|cancel> [node=<id>]",
-    "Example: /ptt once node=iphone",
+    "Usage: /ptt <start|stop|cancel> [node=<id>]",
+    "Example: /ptt start node=iphone",
+    "Then release with: /ptt stop node=iphone",
   ].join("\n");
 }
 

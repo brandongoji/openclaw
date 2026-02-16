@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs";
+import { existsSync, promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFile } from "node:child_process";
@@ -50,13 +50,28 @@ export const moonshineHandlers: GatewayRequestHandlers = {
 
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-moonshine-"));
     const wavPath = path.join(tmpDir, "input.wav");
-    const scriptPath = path.resolve(
-      process.cwd(),
-      "skills",
-      "moonshine-local-stt",
-      "scripts",
-      "transcribe_wav.py",
-    );
+
+    const entryPath = process.argv[1] ? path.resolve(process.argv[1]) : "";
+    const repoFromEntry = entryPath ? path.resolve(path.dirname(entryPath), "..") : "";
+    const candidateScriptPaths = [
+      path.resolve(repoFromEntry, "skills", "moonshine-local-stt", "scripts", "transcribe_wav.py"),
+      path.resolve(process.cwd(), "skills", "moonshine-local-stt", "scripts", "transcribe_wav.py"),
+    ].filter(Boolean);
+
+    const scriptPath = candidateScriptPaths.find((p) => existsSync(p));
+
+    if (!scriptPath) {
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.UNAVAILABLE,
+          `moonshine script missing; checked: ${candidateScriptPaths.join(", ")}`,
+        ),
+      );
+      await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => undefined);
+      return;
+    }
 
     try {
       await fs.writeFile(wavPath, bytes);

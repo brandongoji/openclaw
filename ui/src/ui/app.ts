@@ -148,14 +148,23 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-async function captureMicWavBase64(maxMs = 7000): Promise<string> {
+type MicCaptureSession = {
+  stop: () => Promise<string>;
+  cancel: () => Promise<void>;
+};
+
+async function startMicWavCapture(): Promise<MicCaptureSession> {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error("microphone API unavailable in this browser context");
   }
 
   let stream: MediaStream;
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const micPromise = navigator.mediaDevices.getUserMedia({ audio: true });
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      window.setTimeout(() => reject(new Error("microphone request timed out")), 8000);
+    });
+    stream = await Promise.race([micPromise, timeoutPromise]);
   } catch (err) {
     const e = err as { name?: string; message?: string };
     throw new Error(`mic permission/capture failed (${e?.name ?? "unknown"}: ${e?.message ?? String(err)})`);
@@ -165,8 +174,12 @@ async function captureMicWavBase64(maxMs = 7000): Promise<string> {
   const source = audioContext.createMediaStreamSource(stream);
   const processor = audioContext.createScriptProcessor(4096, 1, 1);
   const chunks: Float32Array[] = [];
+  let finalized = false;
 
   processor.onaudioprocess = (event: AudioProcessingEvent) => {
+    if (finalized) {
+      return;
+    }
     const input = event.inputBuffer.getChannelData(0);
     chunks.push(new Float32Array(input));
   };
@@ -174,26 +187,46 @@ async function captureMicWavBase64(maxMs = 7000): Promise<string> {
   source.connect(processor);
   processor.connect(audioContext.destination);
 
-  await new Promise<void>((resolve) => window.setTimeout(resolve, maxMs));
+  const finalize = async (includeAudio: boolean): Promise<string> => {
+    if (finalized) {
+      return "";
+    }
+    finalized = true;
 
-  processor.disconnect();
-  source.disconnect();
-  stream.getTracks().forEach((t) => t.stop());
-  await audioContext.close();
+    try {
+      processor.disconnect();
+      source.disconnect();
+    } catch {
+      // best-effort cleanup
+    }
+    stream.getTracks().forEach((t) => t.stop());
+    await audioContext.close();
 
-  const total = chunks.reduce((sum, c) => sum + c.length, 0);
-  if (total < 1024) {
-    throw new Error("no audio captured (silence/device blocked)");
-  }
-  const merged = new Float32Array(total);
-  let at = 0;
-  for (const c of chunks) {
-    merged.set(c, at);
-    at += c.length;
-  }
+    if (!includeAudio) {
+      return "";
+    }
 
-  const wav = encodeWavPcm16Mono(merged, 16000);
-  return arrayBufferToBase64(wav);
+    const total = chunks.reduce((sum, c) => sum + c.length, 0);
+    if (total < 1024) {
+      throw new Error("no audio captured (silence/device blocked)");
+    }
+    const merged = new Float32Array(total);
+    let at = 0;
+    for (const c of chunks) {
+      merged.set(c, at);
+      at += c.length;
+    }
+
+    const wav = encodeWavPcm16Mono(merged, 16000);
+    return arrayBufferToBase64(wav);
+  };
+
+  return {
+    stop: () => finalize(true),
+    cancel: async () => {
+      await finalize(false);
+    },
+  };
 }
 
 @customElement("openclaw-app")
@@ -220,8 +253,10 @@ export class OpenClawApp extends LitElement {
   @state() chatLoading = false;
   @state() chatSending = false;
   @state() chatMessage = "";
-  @state() moonshineModel: "tiny" | "base" = "tiny";
+  @state() moonshineModel: "tiny" | "base" = "base";
   @state() moonshineBusy = false;
+  @state() moonshineRecording = false;
+  private moonshineCapture: MicCaptureSession | null = null;
   @state() chatMessages: unknown[] = [];
   @state() chatToolMessages: unknown[] = [];
   @state() chatStream: string | null = null;
@@ -547,13 +582,38 @@ export class OpenClawApp extends LitElement {
     );
   }
 
-  async handleMoonshineTranscribe() {
-    if (!this.connected || !this.client || this.moonshineBusy) {
+  async handleMoonshinePTTStart() {
+    if (!this.connected || !this.client || this.moonshineBusy || this.moonshineRecording) {
       return;
     }
+    this.lastError = null;
+    this.moonshineRecording = true;
+    try {
+      this.moonshineCapture = await startMicWavCapture();
+    } catch (err) {
+      this.moonshineRecording = false;
+      this.moonshineCapture = null;
+      const msg = err instanceof Error ? err.message : String(err);
+      this.lastError = `Moonshine failed to start: ${msg}`;
+      console.error("moonshine-debug", { model: this.moonshineModel, phase: "start", error: err });
+    }
+  }
+
+  async handleMoonshinePTTStop() {
+    if (!this.moonshineRecording) {
+      return;
+    }
+
+    this.moonshineRecording = false;
+    const capture = this.moonshineCapture;
+    this.moonshineCapture = null;
+    if (!capture || !this.client) {
+      return;
+    }
+
     this.moonshineBusy = true;
     try {
-      const audioBase64 = await captureMicWavBase64(6500);
+      const audioBase64 = await capture.stop();
       const res = (await this.client.request("moonshine.transcribe", {
         audioBase64,
         model: this.moonshineModel,
@@ -569,10 +629,32 @@ export class OpenClawApp extends LitElement {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.lastError = `Moonshine failed: ${msg}`;
-      console.error("moonshine-debug", { model: this.moonshineModel, error: err });
+      console.error("moonshine-debug", { model: this.moonshineModel, phase: "stop", error: err });
     } finally {
       this.moonshineBusy = false;
     }
+  }
+
+  async handleMoonshinePTTCancel() {
+    this.moonshineRecording = false;
+    const capture = this.moonshineCapture;
+    this.moonshineCapture = null;
+    if (!capture) {
+      return;
+    }
+    try {
+      await capture.cancel();
+    } catch {
+      // ignore cancel cleanup errors
+    }
+  }
+
+  async handleMoonshineTranscribe() {
+    if (this.moonshineRecording) {
+      await this.handleMoonshinePTTStop();
+      return;
+    }
+    await this.handleMoonshinePTTStart();
   }
 
   async handleWhatsAppStart(force: boolean) {

@@ -63,8 +63,12 @@ export type ChatProps = {
   onDraftChange: (next: string) => void;
   onMoonshineModelChange?: (next: "tiny" | "base") => void;
   onMoonshineTranscribe?: () => void;
+  onMoonshinePTTStart?: () => void;
+  onMoonshinePTTStop?: () => void;
+  onMoonshinePTTCancel?: () => void;
   moonshineModel?: "tiny" | "base";
   moonshineBusy?: boolean;
+  moonshineRecording?: boolean;
   onSend: () => void;
   onAbort?: () => void;
   onQueueRemove: (id: string) => void;
@@ -420,7 +424,7 @@ export function renderChat(props: ChatProps) {
             <label class="field" style="min-width: 120px;">
               <span>Moonshine</span>
               <select
-                .value=${props.moonshineModel ?? "tiny"}
+                .value=${props.moonshineModel ?? "base"}
                 ?disabled=${!props.connected || props.moonshineBusy === true}
                 @change=${(e: Event) =>
                   props.onMoonshineModelChange?.(
@@ -432,12 +436,36 @@ export function renderChat(props: ChatProps) {
               </select>
             </label>
             <button
-              class="btn"
-              ?disabled=${!props.connected || props.moonshineBusy === true}
-              @click=${() => props.onMoonshineTranscribe?.()}
-              title="Moonshine local transcription"
+              class="btn ${props.moonshineRecording ? "active" : ""}"
+              ?disabled=${!props.connected || (props.moonshineBusy === true && !props.moonshineRecording)}
+              @pointerdown=${(e: PointerEvent) => {
+                e.preventDefault();
+                const target = e.currentTarget as HTMLElement | null;
+                try {
+                  target?.setPointerCapture(e.pointerId);
+                } catch {
+                  // pointer capture best-effort only
+                }
+                void props.onMoonshinePTTStart?.();
+              }}
+              @pointerup=${(e: PointerEvent) => {
+                e.preventDefault();
+                const target = e.currentTarget as HTMLElement | null;
+                if (target?.hasPointerCapture(e.pointerId)) {
+                  target.releasePointerCapture(e.pointerId);
+                }
+                void props.onMoonshinePTTStop?.();
+              }}
+              @pointercancel=${() => void props.onMoonshinePTTCancel?.()}
+              @lostpointercapture=${() => void props.onMoonshinePTTCancel?.()}
+              @click=${(e: Event) => e.preventDefault()}
+              title="Hold to talk with Moonshine local transcription"
             >
-              ${props.moonshineBusy ? "Moonshine…" : "Moonshine 🎤"}
+              ${props.moonshineRecording
+                ? "Release to send 🎙️"
+                : props.moonshineBusy
+                  ? "Moonshine…"
+                  : "Hold to talk 🎤"}
             </button>
             <button
               class="btn primary"

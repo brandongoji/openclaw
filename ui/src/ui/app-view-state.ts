@@ -56,6 +56,7 @@ export type AppViewState = {
   chatMessage: string;
   moonshineModel: "tiny" | "base";
   moonshineBusy: boolean;
+  moonshineRecording: boolean;
   chatAttachments: ChatAttachment[];
   chatMessages: unknown[];
   chatToolMessages: unknown[];
@@ -275,6 +276,9 @@ export type AppViewState = {
   setChatMessage: (next: string) => void;
   handleSendChat: (messageOverride?: string, opts?: { restoreDraft?: boolean }) => Promise<void>;
   handleMoonshineTranscribe: () => Promise<void>;
+  handleMoonshinePTTStart: () => Promise<void>;
+  handleMoonshinePTTStop: () => Promise<void>;
+  handleMoonshinePTTCancel: () => Promise<void>;
   handleAbortChat: () => Promise<void>;
   removeQueuedMessage: (id: string) => void;
   handleChatScroll: (event: Event) => void;
