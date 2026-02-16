@@ -1,7 +1,46 @@
 #!/usr/bin/env python3
 import argparse
-import json
+import glob
+import os
+import pathlib
+import shutil
 import sys
+
+
+def ensure_ffmpeg_on_path() -> None:
+    if shutil.which("ffmpeg"):
+        return
+
+    candidates: list[str] = []
+
+    # Winget install path (common on this machine)
+    local = os.environ.get("LOCALAPPDATA", "")
+    if local:
+        candidates.extend(
+            glob.glob(
+                os.path.join(
+                    local,
+                    "Microsoft",
+                    "WinGet",
+                    "Packages",
+                    "Gyan.FFmpeg_*",
+                    "ffmpeg-*-full_build",
+                    "bin",
+                )
+            )
+        )
+
+    # Chocolatey fallback
+    candidates.append(r"C:\ProgramData\chocolatey\bin")
+
+    # Typical manual install fallback
+    candidates.append(r"C:\ffmpeg\bin")
+
+    for p in candidates:
+        if p and pathlib.Path(p, "ffmpeg.exe").exists():
+            os.environ["PATH"] = p + os.pathsep + os.environ.get("PATH", "")
+            if shutil.which("ffmpeg"):
+                return
 
 
 def main() -> int:
@@ -10,6 +49,15 @@ def main() -> int:
     parser.add_argument("--model", default="base")
     parser.add_argument("--language", default="en")
     args = parser.parse_args()
+
+    ensure_ffmpeg_on_path()
+
+    if not shutil.which("ffmpeg"):
+        print(
+            "local whisper transcription failed: ffmpeg not found on PATH (required by whisper)",
+            file=sys.stderr,
+        )
+        return 1
 
     try:
         import whisper  # type: ignore
