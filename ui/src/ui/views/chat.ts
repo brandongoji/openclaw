@@ -453,7 +453,11 @@ export function renderChat(props: ChatProps) {
               </div>
             </details>
             <button
-              class="btn btn--icon ${props.moonshineRecording ? "active" : ""}"
+              class="btn btn--icon stt-toggle ${props.moonshineRecording
+                ? "state-live"
+                : props.moonshineBusy
+                  ? "state-busy"
+                  : "state-idle"}"
               ?disabled=${!props.connected || (props.moonshineBusy === true && !props.moonshineRecording)}
               @click=${() => props.onMoonshineTranscribe?.()}
               title=${props.moonshineRecording

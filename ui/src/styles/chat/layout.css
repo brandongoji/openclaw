@@ -359,6 +359,35 @@
   font-size: 12px;
 }
 
+.stt-toggle.state-idle {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.stt-toggle.state-live {
+  background: rgba(34, 197, 94, 0.16);
+  border-color: rgba(34, 197, 94, 0.55);
+  color: rgb(34, 197, 94);
+}
+
+.stt-toggle.state-busy {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.55);
+  color: rgb(245, 158, 11);
+}
+
+:root[data-theme="light"] .stt-toggle.state-live {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: rgba(22, 163, 74, 0.45);
+  color: rgb(22, 163, 74);
+}
+
+:root[data-theme="light"] .stt-toggle.state-busy {
+  background: rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.45);
+  color: rgb(217, 119, 6);
+}
+
 /* Chat controls - moved to content-header area, left aligned */
 .chat-controls {
   display: flex;
