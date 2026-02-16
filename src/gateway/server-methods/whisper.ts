@@ -73,7 +73,7 @@ export const whisperHandlers: GatewayRequestHandlers = {
       const { stdout, stderr } = await execFileAsync(
         "python",
         [scriptPath, "--input", wavPath, "--model", model, "--language", language],
-        { timeout: maxSeconds * 1000, windowsHide: true, maxBuffer: 2 * 1024 * 1024 },
+        { timeout: maxSeconds * 1000, windowsHide: true, maxBuffer: 64 * 1024 * 1024 },
       );
 
       const text = (stdout ?? "").trim();

@@ -274,7 +274,7 @@ export class OpenClawApp extends LitElement {
     | "base"
     | "whisper-tiny"
     | "whisper-base"
-    | "whisper-large" = "whisper-large";
+    | "whisper-large" = "whisper-base";
   @state() moonshineBusy = false;
   @state() moonshineRecording = false;
   private moonshineCapture: MicCaptureSession | null = null;
@@ -633,7 +633,7 @@ export class OpenClawApp extends LitElement {
         audioBase64,
         model: selectedModel,
         language: "en",
-        maxSeconds: useWhisper ? 90 : 15,
+        maxSeconds: useWhisper ? 600 : 15,
       })) as { text?: string };
 
       if (token !== this.moonshineSessionToken) {

@@ -426,7 +426,7 @@ export function renderChat(props: ChatProps) {
             <label class="field" style="min-width: 120px;">
               <span>Moonshine</span>
               <select
-                .value=${props.moonshineModel ?? "whisper-large"}
+                .value=${props.moonshineModel ?? "whisper-base"}
                 ?disabled=${!props.connected || props.moonshineBusy === true}
                 @change=${(e: Event) =>
                   props.onMoonshineModelChange?.(
