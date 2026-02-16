@@ -457,7 +457,6 @@ export function renderChat(props: ChatProps) {
                 void props.onMoonshinePTTStop?.();
               }}
               @pointercancel=${() => void props.onMoonshinePTTCancel?.()}
-              @lostpointercapture=${() => void props.onMoonshinePTTCancel?.()}
               @click=${(e: Event) => e.preventDefault()}
               title="Hold to talk with Moonshine local transcription"
             >
