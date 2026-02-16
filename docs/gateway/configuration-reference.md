@@ -627,7 +627,6 @@ Time format in system prompt. Default: `auto` (OS preference).
       },
       imageModel: {
         primary: "openrouter/qwen/qwen-2.5-vl-72b-instruct:free",
-        fallbacks: ["openrouter/google/gemini-2.0-flash-vision:free"],
       },
       thinkingDefault: "low",
       verboseDefault: "off",

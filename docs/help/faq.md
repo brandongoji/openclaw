@@ -2276,9 +2276,20 @@ can't find it in its auth store.
 
 ### Why did it also try Google Gemini and fail
 
-If your model config includes Google Gemini as a fallback (or you switched to a Gemini shorthand), OpenClaw will try it during model fallback. If you haven't configured Google credentials, you'll see `No API key found for provider "google"`.
+If your model config includes Google Gemini as a fallback (or you switched to a Gemini shorthand like `gemini` / `gemini-flash`), OpenClaw will try it during model fallback. If you haven't configured Google credentials, you'll see `No API key found for provider "google"`.
 
-Fix: either provide Google auth, or remove/avoid Google models in `agents.defaults.model.fallbacks` / aliases so fallback doesn't route there.
+Fix:
+
+- If you want Gemini to be available as a fallback: set `GEMINI_API_KEY` (provider `google`).
+- If your Gemini key is on free tier, expect quota/retry windows. For reliable fallbacks, only keep Google in fallbacks when your usage is on a billed project or paid plan.
+- Otherwise: remove/avoid Google models in `agents.defaults.model.fallbacks` and avoid Gemini shorthands so fallback doesn't route there.
+
+Helpful commands:
+
+```bash
+openclaw models fallbacks list
+openclaw models fallbacks remove google/gemini-3-pro-preview
+```
 
 **LLM request rejected message thinking signature required google antigravity**
 
