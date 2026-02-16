@@ -61,12 +61,14 @@ export type ChatProps = {
   onRefresh: () => void;
   onToggleFocusMode: () => void;
   onDraftChange: (next: string) => void;
-  onMoonshineModelChange?: (next: "tiny" | "base" | "whisper-1") => void;
+  onMoonshineModelChange?: (
+    next: "tiny" | "base" | "whisper-tiny" | "whisper-base" | "whisper-large",
+  ) => void;
   onMoonshineTranscribe?: () => void;
   onMoonshinePTTStart?: () => void;
   onMoonshinePTTStop?: () => void;
   onMoonshinePTTCancel?: () => void;
-  moonshineModel?: "tiny" | "base" | "whisper-1";
+  moonshineModel?: "tiny" | "base" | "whisper-tiny" | "whisper-base" | "whisper-large";
   moonshineBusy?: boolean;
   moonshineRecording?: boolean;
   onSend: () => void;
@@ -424,14 +426,21 @@ export function renderChat(props: ChatProps) {
             <label class="field" style="min-width: 120px;">
               <span>Moonshine</span>
               <select
-                .value=${props.moonshineModel ?? "whisper-1"}
+                .value=${props.moonshineModel ?? "whisper-large"}
                 ?disabled=${!props.connected || props.moonshineBusy === true}
                 @change=${(e: Event) =>
                   props.onMoonshineModelChange?.(
-                    ((e.target as HTMLSelectElement).value as "tiny" | "base" | "whisper-1") ?? "whisper-1",
+                    ((e.target as HTMLSelectElement).value as
+                      | "tiny"
+                      | "base"
+                      | "whisper-tiny"
+                      | "whisper-base"
+                      | "whisper-large") ?? "whisper-large",
                   )}
               >
-                <option value="whisper-1">whisper-1 (best)</option>
+                <option value="whisper-large">whisper-large (local best)</option>
+                <option value="whisper-base">whisper-base (local)</option>
+                <option value="whisper-tiny">whisper-tiny (local)</option>
                 <option value="base">moonshine-base</option>
                 <option value="tiny">moonshine-tiny</option>
               </select>

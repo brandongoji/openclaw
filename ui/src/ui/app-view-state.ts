@@ -54,7 +54,7 @@ export type AppViewState = {
   chatLoading: boolean;
   chatSending: boolean;
   chatMessage: string;
-  moonshineModel: "tiny" | "base" | "whisper-1";
+  moonshineModel: "tiny" | "base" | "whisper-tiny" | "whisper-base" | "whisper-large";
   moonshineBusy: boolean;
   moonshineRecording: boolean;
   chatAttachments: ChatAttachment[];
