@@ -7,6 +7,8 @@ description: Local speech-to-text using Moonshine models (tiny/base) with CPU/RA
 
 Use this skill to run **local** Moonshine transcription with explicit model control and conservative runtime limits.
 
+Source repo (as requested): https://github.com/usefulsensors/moonshine (currently redirects to moonshine-ai/moonshine).
+
 ## Quick start
 
 - Transcribe an audio file with model selection:
