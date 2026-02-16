@@ -149,8 +149,9 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 type MicCaptureSession = {
-  stop: () => Promise<string>;
+  stop: () => Promise<void>;
   cancel: () => Promise<void>;
+  takeChunkBase64: (minSamples?: number, force?: boolean) => string | null;
 };
 
 async function startMicWavCapture(): Promise<MicCaptureSession> {
@@ -174,22 +175,56 @@ async function startMicWavCapture(): Promise<MicCaptureSession> {
   const source = audioContext.createMediaStreamSource(stream);
   const processor = audioContext.createScriptProcessor(4096, 1, 1);
   const chunks: Float32Array[] = [];
+  let totalSamples = 0;
+  let consumedSamples = 0;
   let finalized = false;
+
+  const mergeChunks = () => {
+    const merged = new Float32Array(totalSamples);
+    let at = 0;
+    for (const c of chunks) {
+      merged.set(c, at);
+      at += c.length;
+    }
+    return merged;
+  };
+
+  const takeChunkBase64 = (minSamples = 10_000, force = false): string | null => {
+    const available = totalSamples - consumedSamples;
+    if (!force && available < minSamples) {
+      return null;
+    }
+    if (available <= 0) {
+      return null;
+    }
+
+    const merged = mergeChunks();
+    const next = merged.subarray(consumedSamples);
+    if (next.length <= 0) {
+      return null;
+    }
+    consumedSamples = merged.length;
+
+    const wav = encodeWavPcm16Mono(next, 16000);
+    return arrayBufferToBase64(wav);
+  };
 
   processor.onaudioprocess = (event: AudioProcessingEvent) => {
     if (finalized) {
       return;
     }
     const input = event.inputBuffer.getChannelData(0);
-    chunks.push(new Float32Array(input));
+    const next = new Float32Array(input);
+    chunks.push(next);
+    totalSamples += next.length;
   };
 
   source.connect(processor);
   processor.connect(audioContext.destination);
 
-  const finalize = async (includeAudio: boolean): Promise<string> => {
+  const finalize = async (): Promise<void> => {
     if (finalized) {
-      return "";
+      return;
     }
     finalized = true;
 
@@ -201,31 +236,12 @@ async function startMicWavCapture(): Promise<MicCaptureSession> {
     }
     stream.getTracks().forEach((t) => t.stop());
     await audioContext.close();
-
-    if (!includeAudio) {
-      return "";
-    }
-
-    const total = chunks.reduce((sum, c) => sum + c.length, 0);
-    if (total < 1024) {
-      throw new Error("no audio captured (silence/device blocked)");
-    }
-    const merged = new Float32Array(total);
-    let at = 0;
-    for (const c of chunks) {
-      merged.set(c, at);
-      at += c.length;
-    }
-
-    const wav = encodeWavPcm16Mono(merged, 16000);
-    return arrayBufferToBase64(wav);
   };
 
   return {
-    stop: () => finalize(true),
-    cancel: async () => {
-      await finalize(false);
-    },
+    stop: () => finalize(),
+    cancel: () => finalize(),
+    takeChunkBase64,
   };
 }
 
@@ -257,6 +273,9 @@ export class OpenClawApp extends LitElement {
   @state() moonshineBusy = false;
   @state() moonshineRecording = false;
   private moonshineCapture: MicCaptureSession | null = null;
+  private moonshineLiveTimer: number | null = null;
+  private moonshineLiveInFlight = false;
+  private moonshineSessionToken = 0;
   @state() chatMessages: unknown[] = [];
   @state() chatToolMessages: unknown[] = [];
   @state() chatStream: string | null = null;
@@ -582,14 +601,89 @@ export class OpenClawApp extends LitElement {
     );
   }
 
+  private appendMoonshineText(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return;
+    }
+    this.chatMessage = this.chatMessage.trim().length > 0 ? `${this.chatMessage} ${trimmed}` : trimmed;
+  }
+
+  private async transcribeMoonshineChunk(audioBase64: string, token: number, phase: string) {
+    if (!this.client || !audioBase64) {
+      return;
+    }
+    this.moonshineBusy = true;
+    try {
+      const res = (await this.client.request("moonshine.transcribe", {
+        audioBase64,
+        model: this.moonshineModel,
+        language: "en",
+        maxSeconds: 15,
+      })) as { text?: string };
+
+      if (token !== this.moonshineSessionToken) {
+        return;
+      }
+
+      const text = (res?.text ?? "").trim();
+      if (!text) {
+        return;
+      }
+      this.appendMoonshineText(text);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.lastError = `Moonshine failed: ${msg}`;
+      console.error("moonshine-debug", { model: this.moonshineModel, phase, error: err });
+    } finally {
+      this.moonshineBusy = false;
+    }
+  }
+
+  private stopMoonshineLiveTimer() {
+    if (this.moonshineLiveTimer != null) {
+      window.clearInterval(this.moonshineLiveTimer);
+      this.moonshineLiveTimer = null;
+    }
+  }
+
+  private async handleMoonshineLiveTick(token: number) {
+    if (!this.moonshineRecording || this.moonshineLiveInFlight || token !== this.moonshineSessionToken) {
+      return;
+    }
+    const capture = this.moonshineCapture;
+    if (!capture) {
+      return;
+    }
+
+    const chunk = capture.takeChunkBase64();
+    if (!chunk) {
+      return;
+    }
+
+    this.moonshineLiveInFlight = true;
+    try {
+      await this.transcribeMoonshineChunk(chunk, token, "live");
+    } finally {
+      this.moonshineLiveInFlight = false;
+    }
+  }
+
   async handleMoonshinePTTStart() {
     if (!this.connected || !this.client || this.moonshineBusy || this.moonshineRecording) {
       return;
     }
     this.lastError = null;
     this.moonshineRecording = true;
+    this.moonshineSessionToken += 1;
+    const token = this.moonshineSessionToken;
+
     try {
       this.moonshineCapture = await startMicWavCapture();
+      this.stopMoonshineLiveTimer();
+      this.moonshineLiveTimer = window.setInterval(() => {
+        void this.handleMoonshineLiveTick(token);
+      }, 1200);
     } catch (err) {
       this.moonshineRecording = false;
       this.moonshineCapture = null;
@@ -605,38 +699,38 @@ export class OpenClawApp extends LitElement {
     }
 
     this.moonshineRecording = false;
+    this.stopMoonshineLiveTimer();
+
     const capture = this.moonshineCapture;
     this.moonshineCapture = null;
-    if (!capture || !this.client) {
+    const token = this.moonshineSessionToken;
+
+    if (!capture) {
       return;
     }
 
-    this.moonshineBusy = true;
     try {
-      const audioBase64 = await capture.stop();
-      const res = (await this.client.request("moonshine.transcribe", {
-        audioBase64,
-        model: this.moonshineModel,
-        language: "en",
-        maxSeconds: 15,
-      })) as { text?: string };
-      const text = (res?.text ?? "").trim();
-      if (!text) {
-        this.lastError = "Moonshine completed but no speech was detected.";
-        return;
+      // Flush any remaining unsent samples after release.
+      const tail = capture.takeChunkBase64(1, true);
+      await capture.stop();
+      if (tail) {
+        await this.transcribeMoonshineChunk(tail, token, "stop");
       }
-      this.chatMessage = this.chatMessage.trim().length > 0 ? `${this.chatMessage} ${text}` : text;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.lastError = `Moonshine failed: ${msg}`;
       console.error("moonshine-debug", { model: this.moonshineModel, phase: "stop", error: err });
     } finally {
-      this.moonshineBusy = false;
+      this.moonshineLiveInFlight = false;
     }
   }
 
   async handleMoonshinePTTCancel() {
     this.moonshineRecording = false;
+    this.stopMoonshineLiveTimer();
+    this.moonshineSessionToken += 1;
+    this.moonshineLiveInFlight = false;
+
     const capture = this.moonshineCapture;
     this.moonshineCapture = null;
     if (!capture) {
