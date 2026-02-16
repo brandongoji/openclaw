@@ -140,6 +140,38 @@ export const FIELD_HELP: Record<string, string> = {
     "Optional per-provider overrides for billing backoff (hours).",
   "auth.cooldowns.billingMaxHours": "Cap (hours) for billing backoff (default: 24).",
   "auth.cooldowns.failureWindowHours": "Failure window (hours) for backoff counters (default: 24).",
+  models:
+    "AI model catalog + provider auth. Most users can leave this alone and just set a default model (agents.defaults.model.primary) and API keys via env vars.",
+  "models.mode":
+    'How to combine your configured providers/models with the built-in catalog ("merge" default, or "replace").',
+  "models.providers":
+    "Provider config keyed by provider id (e.g. openai, anthropic, openrouter). Each entry can include auth + baseUrl + explicit model definitions.",
+  "models.providers.*.baseUrl":
+    "Provider base URL (optional; defaults to the provider's standard endpoint). Useful for OpenAI-compatible gateways/proxies.",
+  "models.providers.*.apiKey":
+    "Provider API key. Prefer environment variables where supported (e.g. OPENAI_API_KEY). Values here are treated as sensitive and should not be committed.",
+  "models.providers.*.auth":
+    'Auth mode for this provider ("api-key", "oauth", "token", or "aws-sdk").',
+  "models.providers.*.api":
+    "Default API protocol for models under this provider (overridable per-model).",
+  "models.providers.*.headers":
+    "Extra HTTP headers added to requests for this provider.",
+  "models.providers.*.authHeader":
+    "When true, send the Authorization header for this provider (some OpenAI-compatible proxies expect a custom header setup).",
+  "models.providers.*.models":
+    "Explicit model definitions for this provider. Omit to rely on the built-in model catalog.",
+  "models.providers.*.models[].id":
+    "Provider-local model id (the part after provider/, e.g. gpt-5.2).",
+  "models.providers.*.models[].name": "Friendly model name shown in UIs (optional).",
+  "models.providers.*.models[].api":
+    "API protocol for this specific model (overrides provider default).",
+  "models.providers.*.models[].reasoning":
+    "Hint that the model is a reasoning model (used for routing and UX).",
+  "models.providers.*.models[].input":
+    'Model input modalities (e.g. ["text"], or ["text","image"]).',
+  "models.providers.*.models[].contextWindow": "Model context window token limit (hint).",
+  "models.providers.*.models[].maxTokens": "Model max output tokens (hint).",
+  "models.providers.*.models[].headers": "Extra HTTP headers for this specific model.",
   "agents.defaults.bootstrapMaxChars":
     "Max characters of each workspace bootstrap file injected into the system prompt before truncation (default: 20000).",
   "agents.defaults.bootstrapTotalMaxChars":

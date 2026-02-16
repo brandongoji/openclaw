@@ -1,0 +1,30 @@
+2026-02-15T23:58:14.745Z [canvas] host mounted at http://127.0.0.1:18789/__openclaw__/canvas/ (root C:\Users\brand\.openclaw\canvas)
+2026-02-15T23:58:14.964Z [heartbeat] started
+2026-02-15T23:58:14.977Z [gateway] agent model: google/gemini-3-flash-preview
+2026-02-15T23:58:14.982Z [gateway] listening on ws://127.0.0.1:18789 (PID 8852)
+2026-02-15T23:58:14.988Z [gateway] listening on ws://[::1]:18789
+2026-02-15T23:58:14.997Z [gateway] log file: \tmp\openclaw\openclaw-2026-02-15.log
+2026-02-15T23:58:15.015Z [browser/service] Browser control service ready (profiles=2)
+2026-02-15T23:58:21.362Z [ws] webchat connected conn=3ec33d99-9f63-4449-bdc6-b1f9150038aa remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-15T23:58:21.503Z [ws] ⇄ res ✓ chat.history 119ms conn=3ec33d99…38aa id=88efe4ca…aaae
+2026-02-15T23:58:22.102Z [ws] webchat connected conn=c59dfd38-332e-499e-b504-2f419dcd4312 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-15T23:58:24.292Z [ws] webchat connected conn=41b3c591-fe69-4254-9c50-bd0d8bb5fc8e remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-15T23:58:25.293Z [ws] webchat connected conn=10f4f2d5-7173-4a2b-88b4-f7995cdbe7d7 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-15T23:58:30.841Z [ws] webchat disconnected code=1001 reason=n/a conn=3ec33d99-9f63-4449-bdc6-b1f9150038aa
+2026-02-15T23:58:31.019Z [ws] webchat connected conn=6b35a525-e2c6-4da4-abbc-e7c0cb2f765f remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-15T23:58:51.071Z [ws] webchat disconnected code=1005 reason=n/a conn=6b35a525-e2c6-4da4-abbc-e7c0cb2f765f
+2026-02-15T23:58:51.096Z [ws] webchat connected conn=4cdb0539-cb5b-47f5-8afe-602906a0bb92 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-15T23:58:57.791Z [ws] webchat disconnected code=1001 reason=n/a conn=4cdb0539-cb5b-47f5-8afe-602906a0bb92
+2026-02-15T23:58:57.962Z [ws] webchat connected conn=8dadea9c-f270-4375-a09f-b7ba0081db19 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-16T00:15:10.887Z [ws] webchat disconnected code=1001 reason=n/a conn=10f4f2d5-7173-4a2b-88b4-f7995cdbe7d7
+2026-02-16T00:15:12.692Z [ws] webchat disconnected code=1001 reason=n/a conn=c59dfd38-332e-499e-b504-2f419dcd4312
+2026-02-16T00:34:43.369Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.google.models, agents.defaults.maxConcurrent)
+2026-02-16T00:34:43.378Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.google.models, agents.defaults.maxConcurrent)
+2026-02-16T00:34:52.927Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.google.models, agents.defaults.subagents.maxConcurrent)
+2026-02-16T00:34:52.932Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.google.models, agents.defaults.subagents.maxConcurrent)
+2026-02-16T00:35:02.052Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.google.models)
+2026-02-16T00:35:02.057Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.google.models)
+2026-02-16T00:35:11.028Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.google.models, agents.defaults.model.fallbacks)
+2026-02-16T00:35:11.033Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.google.models, agents.defaults.model.fallbacks)
+2026-02-16T00:35:21.380Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.google.models, logging)
+2026-02-16T00:35:21.383Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.google.models, logging)

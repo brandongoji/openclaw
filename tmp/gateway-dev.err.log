@@ -1,0 +1,4 @@
+[openclaw] Building TypeScript (dist is stale).
+2026-02-15T18:16:28.309-05:00 Config overwrite: C:\Users\brand\.openclaw-dev\openclaw.json (sha256 7f2f5c3db1eb33671ea1cc2053e8fa43b2dc08aa04296047fcbc824caa303ee4 -> 95ab5bf8002e87b4f758b4d5a8b1003b42ab4c6f188c0a60d10b6ce155bfb73e, backup=C:\Users\brand\.openclaw-dev\openclaw.json.bak)
+2026-02-15T23:16:30.328Z [bonjour] gateway name conflict resolved; newName="DESKTOP-L5DVTJK (OpenClaw) (2)"
+2026-02-15T23:16:30.338Z [bonjour] gateway hostname conflict resolved; newHostname="openclaw-(2)"
