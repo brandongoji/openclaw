@@ -1,0 +1,30 @@
+{
+  "phase": "phase2",
+  "capturedAt": "2026-02-16T01:46:07.826Z",
+  "upstream": {
+    "provider": "google",
+    "model": "gemini-3-flash-preview",
+    "httpStatus": 429,
+    "httpStatusText": "Too Many Requests",
+    "googleStatus": "RESOURCE_EXHAUSTED",
+    "googleCode": 429,
+    "quota": {
+      "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+      "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+      "quotaValue": "20",
+      "quotaDimensions": {
+        "location": "global",
+        "model": "gemini-3-flash"
+      }
+    },
+    "retry": {
+      "retryDelay": "23s"
+    },
+    "messageSnippet": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: [url] To monitor your current usage, head to: [url]  | * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_fre"
+  },
+  "classification": {
+    "bucket": "B",
+    "label": "Google Gemini free-tier quota (RESOURCE_EXHAUSTED generate_content_free_tier_requests)",
+    "evidence": "phase2-test.jsonl assistant errorMessage contains google.rpc.QuotaFailure + RetryInfo"
+  }
+}
