@@ -607,11 +607,34 @@ export class OpenClawApp extends LitElement {
   }
 
   private appendMoonshineText(text: string) {
-    const trimmed = text.trim();
+    let trimmed = text.replace(/\s+/g, " ").trim();
+    // Remove common junk prefixes from chunked STT (e.g., ". . ." / "..." / "uh uh uh")
+    trimmed = trimmed.replace(/^(?:[.\u2026]\s*){2,}/, "");
+    trimmed = trimmed.replace(/^\b(\w+)(?:\s+\1){2,}\b\s*/i, "");
     if (!trimmed) {
       return;
     }
-    this.chatMessage = this.chatMessage.trim().length > 0 ? `${this.chatMessage} ${trimmed}` : trimmed;
+
+    const existing = this.chatMessage.trim();
+    if (existing.length > 0) {
+      // Skip exact repeat chunk
+      if (existing.endsWith(trimmed)) {
+        return;
+      }
+      // Trim overlapping prefix when live chunks repeat boundary words.
+      const maxOverlap = Math.min(80, existing.length, trimmed.length);
+      for (let i = maxOverlap; i >= 12; i--) {
+        if (existing.endsWith(trimmed.slice(0, i))) {
+          trimmed = trimmed.slice(i).trimStart();
+          break;
+        }
+      }
+      if (!trimmed) {
+        return;
+      }
+    }
+
+    this.chatMessage = existing.length > 0 ? `${existing} ${trimmed}` : trimmed;
   }
 
   private async transcribeMoonshineChunk(audioBase64: string, token: number, phase: string) {
