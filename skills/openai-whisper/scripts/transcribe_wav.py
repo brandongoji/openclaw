@@ -59,6 +59,9 @@ def main() -> int:
         )
         return 1
 
+    # Reduce noisy progress output in stderr for gateway clients/logs.
+    os.environ.setdefault("TQDM_DISABLE", "1")
+
     try:
         import whisper  # type: ignore
     except Exception as e:
@@ -70,6 +73,7 @@ def main() -> int:
         result = model.transcribe(
             args.input,
             language=args.language,
+            verbose=False,
             fp16=False,
             temperature=0,
             best_of=5,

@@ -27,10 +27,20 @@ export const whisperHandlers: GatewayRequestHandlers = {
       ? modelRaw
       : "base";
     const language = typeof p.language === "string" && p.language.trim() ? p.language.trim() : "en";
-    const maxSeconds =
-      typeof p.maxSeconds === "number" && Number.isFinite(p.maxSeconds)
-        ? Math.max(5, Math.min(180, Math.floor(p.maxSeconds)))
-        : 60;
+    const modelDefaultMaxSeconds: Record<string, number> = {
+      tiny: 120,
+      base: 180,
+      small: 300,
+      medium: 600,
+      large: 1200,
+      "large-v3": 1200,
+    };
+    const requestedMaxSeconds =
+      typeof p.maxSeconds === "number" && Number.isFinite(p.maxSeconds) ? Math.floor(p.maxSeconds) : undefined;
+    const maxSeconds = Math.max(
+      5,
+      Math.min(1800, requestedMaxSeconds ?? modelDefaultMaxSeconds[model] ?? 180),
+    );
 
     if (!audioBase64) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "audioBase64 required"));
@@ -79,8 +89,18 @@ export const whisperHandlers: GatewayRequestHandlers = {
       const text = (stdout ?? "").trim();
       respond(true, { ok: true, text, model, language, stderr: (stderr ?? "").trim() || undefined });
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, `local whisper transcribe failed: ${message}`));
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      const message = rawMessage.length > 2000 ? `${rawMessage.slice(0, 2000)}…` : rawMessage;
+      const hint = /checksum does not match|re-downloading the file/i.test(rawMessage)
+        ? " Whisper model cache is being refreshed; large models may need several minutes on first retry."
+        : /timed out|timeout/i.test(rawMessage)
+          ? " Whisper timed out; try again or use a smaller model while large finishes warming up."
+          : "";
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.UNAVAILABLE, `local whisper transcribe failed: ${message}${hint}`),
+      );
     } finally {
       await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => undefined);
     }
