@@ -399,7 +399,7 @@
   animation: stt-processing-fade 1.4s ease-in-out infinite;
   user-select: none;
 }
-`n@keyframes stt-processing-pulse {
+@keyframes stt-processing-pulse {
   0%,
   100% {
     transform: scale(1);
