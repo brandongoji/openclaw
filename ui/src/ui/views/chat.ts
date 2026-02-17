@@ -1,4 +1,4 @@
-import { html, nothing } from "lit";
+﻿import { html, nothing } from "lit";
 import { ref } from "lit/directives/ref.js";
 import { repeat } from "lit/directives/repeat.js";
 import type { SessionsListResult } from "../types.ts";
@@ -62,13 +62,27 @@ export type ChatProps = {
   onToggleFocusMode: () => void;
   onDraftChange: (next: string) => void;
   onMoonshineModelChange?: (
-    next: "tiny" | "base" | "whisper-tiny" | "whisper-base" | "whisper-large",
+    next:
+      | "tiny"
+      | "base"
+      | "whisper-tiny"
+      | "whisper-base"
+      | "whisper-small"
+      | "whisper-large"
+      | "parakeet-v2",
   ) => void;
   onMoonshineTranscribe?: () => void;
   onMoonshinePTTStart?: () => void;
   onMoonshinePTTStop?: () => void;
   onMoonshinePTTCancel?: () => void;
-  moonshineModel?: "tiny" | "base" | "whisper-tiny" | "whisper-base" | "whisper-large";
+  moonshineModel?:
+    | "tiny"
+    | "base"
+    | "whisper-tiny"
+    | "whisper-base"
+    | "whisper-small"
+    | "whisper-large"
+    | "parakeet-v2";
   moonshineBusy?: boolean;
   moonshineRecording?: boolean;
   onSend: () => void;
@@ -212,8 +226,8 @@ export function renderChat(props: ChatProps) {
   const composePlaceholder = props.connected
     ? hasAttachments
       ? "Add a message or paste more images..."
-      : "Message (↩ to send, Shift+↩ for line breaks, paste images)"
-    : "Connect to the gateway to start chatting…";
+      : "Message (â†© to send, Shift+â†© for line breaks, paste images)"
+    : "Connect to the gateway to start chattingâ€¦";
 
   const splitRatio = props.splitRatio ?? 0.6;
   const sidebarOpen = Boolean(props.sidebarOpen && props.onCloseSidebar);
@@ -227,7 +241,7 @@ export function renderChat(props: ChatProps) {
       ${
         props.loading
           ? html`
-              <div class="muted">Loading chat…</div>
+              <div class="muted">Loading chatâ€¦</div>
             `
           : nothing
       }
@@ -431,7 +445,7 @@ export function renderChat(props: ChatProps) {
                 <label class="field stt-menu__field">
                   <span>Transcriber model</span>
                   <select
-                    .value=${props.moonshineModel ?? "whisper-base"}
+                    .value=${props.moonshineModel ?? "whisper-tiny"}
                     ?disabled=${!props.connected || props.moonshineBusy === true}
                     @change=${(e: Event) =>
                       props.onMoonshineModelChange?.(
@@ -440,55 +454,60 @@ export function renderChat(props: ChatProps) {
                           | "base"
                           | "whisper-tiny"
                           | "whisper-base"
-                          | "whisper-large") ?? "whisper-base",
+                          | "whisper-small"
+                          | "whisper-large"
+                          | "parakeet-v2") ?? "whisper-tiny",
                       )}
                   >
-                    <option value="whisper-large">whisper-large (local best)</option>
-                    <option value="whisper-base">whisper-base (local)</option>
-                    <option value="whisper-tiny">whisper-tiny (local)</option>
-                    <option value="base">moonshine-base</option>
-                    <option value="tiny">moonshine-tiny</option>
+                    <optgroup label="Whisper (local)">
+                      <option value="whisper-tiny">tiny (fastest)</option>
+                      <option value="whisper-base">base</option>
+                      <option value="whisper-small">small</option>
+                      <option value="whisper-large">large (best quality)</option>
+                    </optgroup>
+                    <optgroup label="Moonshine (local)">
+                      <option value="tiny">tiny</option>
+                      <option value="base">base</option>
+                    </optgroup>
+                    <optgroup label="Parakeet (local)">
+                      <option value="parakeet-v2">tdt-0.6b-v2</option>
+                    </optgroup>
                   </select>
                 </label>
               </div>
             </details>
-            <button
-              class="btn btn--icon stt-toggle ${props.moonshineRecording
-                ? "state-live"
-                : props.moonshineBusy
-                  ? "state-busy"
-                  : "state-idle"}"
-              ?disabled=${!props.connected || (props.moonshineBusy === true && !props.moonshineRecording)}
-              @click=${() => props.onMoonshineTranscribe?.()}
-              title=${props.moonshineRecording
-                ? "Stop transcription"
-                : props.moonshineBusy
-                  ? "Processing transcription"
-                  : "Start transcription"}
-              aria-label=${props.moonshineRecording
-                ? "Stop transcription"
-                : props.moonshineBusy
-                  ? "Processing transcription"
-                  : "Start transcription"}
-            >
-              ${icons.radio}
-            </button>
-            <span
-              class="pill ${props.moonshineBusy ? "warn" : props.moonshineRecording ? "ok" : ""}"
-              title=${props.moonshineBusy
-                ? "Audio is being processed"
-                : props.moonshineRecording
-                  ? "Live transcription is active"
-                  : "Live transcription is idle"}
-            >
-              ${props.moonshineBusy ? "PROCESSING…" : props.moonshineRecording ? "LIVE" : "IDLE"}
-            </span>
+            <div class="stt-status-wrap">
+              <button
+                class="btn btn--icon stt-toggle ${props.moonshineRecording
+                  ? "state-live"
+                  : props.moonshineBusy
+                    ? "state-busy"
+                    : "state-idle"}"
+                ?disabled=${!props.connected || (props.moonshineBusy === true && !props.moonshineRecording)}
+                @click=${() => props.onMoonshineTranscribe?.()}
+                title=${props.moonshineRecording
+                  ? "Stop transcription"
+                  : props.moonshineBusy
+                    ? "Processing"
+                    : "Start transcription"}
+                aria-label=${props.moonshineRecording
+                  ? "Stop transcription"
+                  : props.moonshineBusy
+                    ? "Processing"
+                    : "Start transcription"}
+              >
+                ${icons.radio}
+              </button>
+              ${props.moonshineBusy && !props.moonshineRecording
+                ? html`<span class="stt-inline-processing" aria-live="polite">processingâ€¦</span>`
+                : nothing}
+            </div>
             <button
               class="btn primary"
               ?disabled=${!props.connected}
               @click=${props.onSend}
             >
-              ${isBusy ? "Queue" : "Send"}<kbd class="btn-kbd">↵</kbd>
+              ${isBusy ? "Queue" : "Send"}<kbd class="btn-kbd">â†µ</kbd>
             </button>
           </div>
         </div>
@@ -632,3 +651,4 @@ function messageKey(message: unknown, index: number): string {
   }
   return `msg:${role}:${index}`;
 }
+

@@ -1,4 +1,4 @@
-/* =============================================
+﻿/* =============================================
    CHAT CARD LAYOUT - Flex container with sticky compose
    ============================================= */
 
@@ -380,6 +380,45 @@
   background: rgba(245, 158, 11, 0.16);
   border-color: rgba(245, 158, 11, 0.55);
   color: rgb(245, 158, 11);
+  animation: stt-processing-pulse 1.1s ease-in-out infinite;
+}
+
+.stt-status-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stt-inline-processing {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  opacity: 0.75;
+  animation: stt-processing-fade 1.4s ease-in-out infinite;
+  user-select: none;
+}
+`n@keyframes stt-processing-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.25);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+}
+
+@keyframes stt-processing-fade {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
 }
 
 :root[data-theme="light"] .stt-toggle.state-live {
@@ -518,3 +557,4 @@
     min-width: 120px;
   }
 }
+

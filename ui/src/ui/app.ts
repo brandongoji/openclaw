@@ -274,7 +274,9 @@ export class OpenClawApp extends LitElement {
     | "base"
     | "whisper-tiny"
     | "whisper-base"
-    | "whisper-large" = "whisper-base";
+    | "whisper-small"
+    | "whisper-large"
+    | "parakeet-v2" = "whisper-tiny";
   @state() moonshineBusy = false;
   @state() moonshineRecording = false;
   private moonshineCapture: MicCaptureSession | null = null;
@@ -659,17 +661,26 @@ export class OpenClawApp extends LitElement {
       const whisperModelMap: Record<string, string> = {
         "whisper-tiny": "tiny",
         "whisper-base": "base",
+        "whisper-small": "small",
         "whisper-large": "large",
       };
       const useWhisper = this.moonshineModel.startsWith("whisper-");
+      const useParakeet = this.moonshineModel === "parakeet-v2";
       const selectedModel = useWhisper
         ? (whisperModelMap[this.moonshineModel] ?? "base")
-        : this.moonshineModel;
-      const res = (await this.client.request(useWhisper ? "whisper.transcribe" : "moonshine.transcribe", {
+        : useParakeet
+          ? "nvidia/parakeet-tdt-0.6b-v2"
+          : this.moonshineModel;
+      const method = useWhisper
+        ? "whisper.transcribe"
+        : useParakeet
+          ? "parakeet.transcribe"
+          : "moonshine.transcribe";
+      const res = (await this.client.request(method, {
         audioBase64,
         model: selectedModel,
         language: "en",
-        maxSeconds: useWhisper ? 600 : 15,
+        maxSeconds: useWhisper || useParakeet ? 600 : 15,
       })) as { text?: string };
 
       if (token !== this.moonshineSessionToken) {
@@ -687,6 +698,32 @@ export class OpenClawApp extends LitElement {
       this.appendMoonshineText(text);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+
+      // Compatibility fallback: if gateway doesn't have parakeet yet,
+      // transparently fall back to whisper-tiny so STT still works.
+      if (this.moonshineModel === "parakeet-v2" && /unknown method:\s*parakeet\.transcribe/i.test(msg)) {
+        try {
+          const res = (await this.client.request("whisper.transcribe", {
+            audioBase64,
+            model: "tiny",
+            language: "en",
+            maxSeconds: 600,
+          })) as { text?: string };
+
+          if (token === this.moonshineSessionToken && (phase === "stop" || this.moonshineRecording)) {
+            const text = (res?.text ?? "").trim();
+            if (text) {
+              this.appendMoonshineText(text);
+            }
+          }
+
+          this.lastError = "Parakeet backend not loaded yet; temporarily using Whisper Tiny.";
+          return;
+        } catch {
+          // fall through to normal error handling
+        }
+      }
+
       this.lastError = `Moonshine failed: ${msg}`;
       console.error("moonshine-debug", { model: this.moonshineModel, phase, error: err });
     } finally {
@@ -706,8 +743,8 @@ export class OpenClawApp extends LitElement {
       return;
     }
 
-    // Option A: for Whisper models, defer transcription until stop (final-only).
-    if (this.moonshineModel.startsWith("whisper-")) {
+    // For heavier models (Whisper/Parakeet), defer transcription until stop (final-only).
+    if (this.moonshineModel.startsWith("whisper-") || this.moonshineModel === "parakeet-v2") {
       return;
     }
 
@@ -761,6 +798,8 @@ export class OpenClawApp extends LitElement {
     }
 
     this.moonshineRecording = false;
+    // Show processing state immediately on release for clearer UX.
+    this.moonshineBusy = true;
     this.stopMoonshineLiveTimer();
 
     const capture = this.moonshineCapture;
@@ -768,6 +807,7 @@ export class OpenClawApp extends LitElement {
     const token = this.moonshineSessionToken;
 
     if (!capture) {
+      this.moonshineBusy = false;
       return;
     }
 
@@ -777,10 +817,13 @@ export class OpenClawApp extends LitElement {
       await capture.stop();
       if (tail) {
         await this.transcribeMoonshineChunk(tail, token, "stop");
+      } else {
+        this.moonshineBusy = false;
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.lastError = `Moonshine failed: ${msg}`;
+      this.moonshineBusy = false;
       console.error("moonshine-debug", { model: this.moonshineModel, phase: "stop", error: err });
     } finally {
       this.moonshineLiveInFlight = false;
