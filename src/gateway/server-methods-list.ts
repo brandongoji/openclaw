@@ -92,6 +92,7 @@ const BASE_METHODS = [
   "chat.send",
   "moonshine.transcribe",
   "whisper.transcribe",
+  "parakeet.transcribe",
 ];
 
 export function listGatewayMethods(): string[] {

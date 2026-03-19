@@ -22,6 +22,32 @@ struct SettingsRootView: View {
             if self.isNixMode {
                 self.nixManagedBanner
             }
+
+            HStack(spacing: 8) {
+                Button {
+                    self.stepTab(direction: -1)
+                } label: {
+                    Image(systemName: "chevron.left")
+                }
+                .help("Previous settings tab")
+                .disabled(!self.canStepTab(direction: -1))
+
+                Button {
+                    self.stepTab(direction: 1)
+                } label: {
+                    Image(systemName: "chevron.right")
+                }
+                .help("Next settings tab")
+                .disabled(!self.canStepTab(direction: 1))
+
+                Text(self.selectedTab.title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.leading, 4)
+
+                Spacer(minLength: 0)
+            }
+
             TabView(selection: self.$selectedTab) {
                 GeneralSettings(state: self.state)
                     .tabItem { Label("General", systemImage: "gearshape") }
@@ -142,6 +168,27 @@ struct SettingsRootView: View {
     private func validTab(for requested: SettingsTab) -> SettingsTab {
         if requested == .debug, !self.state.debugPaneEnabled { return .general }
         return requested
+    }
+
+    private var visibleTabs: [SettingsTab] {
+        SettingsTab.allCases.filter { self.validTab(for: $0) == $0 }
+    }
+
+    private func canStepTab(direction: Int) -> Bool {
+        let tabs = self.visibleTabs
+        guard let idx = tabs.firstIndex(of: self.selectedTab) else { return false }
+        let next = idx + direction
+        return next >= 0 && next < tabs.count
+    }
+
+    private func stepTab(direction: Int) {
+        let tabs = self.visibleTabs
+        guard let idx = tabs.firstIndex(of: self.selectedTab) else { return }
+        let next = idx + direction
+        guard next >= 0, next < tabs.count else { return }
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
+            self.selectedTab = tabs[next]
+        }
     }
 
     @MainActor

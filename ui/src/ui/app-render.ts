@@ -98,8 +98,7 @@ export function renderApp(state: AppViewState) {
   const chatAvatarUrl = state.chatAvatarUrl ?? assistantAvatarUrl ?? null;
   const configValue =
     state.configForm ?? (state.configSnapshot?.config as Record<string, unknown> | null);
-  const basePath = normalizeBasePath(state.basePath ?? "");
-  const resolvedAgentId =
+  const basePath = normalizeBasePath(state.basePath ?? "");  const resolvedAgentId =
     state.agentsSelectedId ??
     state.agentsList?.defaultId ??
     state.agentsList?.agents?.[0]?.id ??
@@ -126,8 +125,8 @@ export function renderApp(state: AppViewState) {
               <img src=${basePath ? `${basePath}/favicon.svg` : "/favicon.svg"} alt="OpenClaw" />
             </div>
             <div class="brand-text">
-              <div class="brand-title">OPENCLAW</div>
-              <div class="brand-sub">Gateway Dashboard</div>
+              <div class="brand-title">Hagios Original</div>
+              <div class="brand-sub">Gateway Dashboard, pwrd by openclaw</div>
             </div>
           </div>
         </div>
@@ -141,6 +140,39 @@ export function renderApp(state: AppViewState) {
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
+        <div class="nav-stepper">
+          <button
+            class="nav-stepper__btn nav-stepper__btn--left"
+            title="Pan tabs left"
+            @click=${() => {
+              const navEl = state.renderRoot?.querySelector(".nav-scroll") as HTMLElement | null;
+              if (!navEl) return;
+              if (navEl.scrollWidth > navEl.clientWidth) {
+                navEl.scrollBy({ left: -220, behavior: "smooth" });
+              } else {
+                navEl.scrollBy({ top: -220, behavior: "smooth" });
+              }
+            }}
+          >
+            <
+          </button>
+          <button
+            class="nav-stepper__btn nav-stepper__btn--right"
+            title="Pan tabs right"
+            @click=${() => {
+              const navEl = state.renderRoot?.querySelector(".nav-scroll") as HTMLElement | null;
+              if (!navEl) return;
+              if (navEl.scrollWidth > navEl.clientWidth) {
+                navEl.scrollBy({ left: 220, behavior: "smooth" });
+              } else {
+                navEl.scrollBy({ top: 220, behavior: "smooth" });
+              }
+            }}
+          >
+            >
+          </button>
+        </div>
+        <div class="nav-scroll">
         ${TAB_GROUPS.map((group) => {
           const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
           const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
@@ -159,7 +191,7 @@ export function renderApp(state: AppViewState) {
                 aria-expanded=${!isGroupCollapsed}
               >
                 <span class="nav-label__text">${group.label}</span>
-                <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "−"}</span>
+                <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "âˆ’"}</span>
               </button>
               <div class="nav-group__items">
                 ${group.tabs.map((tab) => renderTab(state, tab))}
@@ -183,6 +215,7 @@ export function renderApp(state: AppViewState) {
               <span class="nav-item__text">Docs</span>
             </a>
           </div>
+        </div>
         </div>
       </aside>
       <main class="content ${isChat ? "content--chat" : ""}">
@@ -956,3 +989,9 @@ export function renderApp(state: AppViewState) {
     </div>
   `;
 }
+
+
+
+
+
+

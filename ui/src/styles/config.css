@@ -1274,7 +1274,7 @@
 
 .cfg-map__item {
   display: grid;
-  grid-template-columns: 150px 1fr auto;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr) auto;
   gap: 10px;
   align-items: start;
 }
@@ -1284,6 +1284,12 @@
 }
 
 .cfg-map__item-value {
+  min-width: 0;
+}
+
+.cfg-map__item-value .cfg-object,
+.cfg-map__item-value .cfg-array,
+.cfg-map__item-value .cfg-map {
   min-width: 0;
 }
 
@@ -1332,6 +1338,17 @@
 /* ===========================================
    Mobile Responsiveness
    =========================================== */
+
+@media (max-width: 1200px) {
+  .cfg-map__item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cfg-map__item-remove {
+    justify-self: end;
+  }
+}
 
 @media (max-width: 768px) {
   .config-layout {

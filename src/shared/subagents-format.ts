@@ -80,17 +80,19 @@ export function resolveIoTokens(entry?: TokenUsageLike) {
 
 export function formatTokenUsageDisplay(entry?: TokenUsageLike) {
   const io = resolveIoTokens(entry);
-  const promptCache = resolveTotalTokens(entry);
+  const total = resolveTotalTokens(entry);
   const parts: string[] = [];
   if (io) {
     const input = formatTokenShort(io.input) ?? "0";
     const output = formatTokenShort(io.output) ?? "0";
-    parts.push(`tokens ${formatTokenShort(io.total)} (in ${input} / out ${output})`);
-  } else if (typeof promptCache === "number" && promptCache > 0) {
-    parts.push(`tokens ${formatTokenShort(promptCache)} prompt/cache`);
+    const promptCacheIsSeparate = typeof total === "number" && total > io.total;
+    const label = promptCacheIsSeparate ? "io" : "tokens";
+    parts.push(`${label} ${formatTokenShort(io.total)} (in ${input} / out ${output})`);
+  } else if (typeof total === "number" && total > 0) {
+    parts.push(`tokens ${formatTokenShort(total)} prompt/cache`);
   }
-  if (typeof promptCache === "number" && io && promptCache > io.total) {
-    parts.push(`prompt/cache ${formatTokenShort(promptCache)}`);
+  if (typeof total === "number" && io && total > io.total) {
+    parts.push(`prompt/cache ${formatTokenShort(total - io.total)}`);
   }
   return parts.join(", ");
 }

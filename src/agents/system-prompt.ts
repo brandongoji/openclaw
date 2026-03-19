@@ -4,6 +4,7 @@ import type { ResolvedTimeFormat } from "./date-time.js";
 import type { EmbeddedContextFile } from "./pi-embedded-helpers.js";
 import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import { listDeliverableMessageChannels } from "../utils/message-channel.js";
+import { INTERNAL_MESSAGE_CHANNEL } from "../utils/message-channel.js";
 
 /**
  * Controls which hardcoded sections are included in the system prompt.
@@ -79,8 +80,12 @@ function buildTimeSection(params: { userTimezone?: string }) {
   return ["## Current Date & Time", `Time zone: ${params.userTimezone}`, ""];
 }
 
-function buildReplyTagsSection(isMinimal: boolean) {
-  if (isMinimal) {
+function buildReplyTagsSection(params: { isMinimal: boolean; runtimeChannel?: string }) {
+  if (params.isMinimal) {
+    return [];
+  }
+  // Native reply tags are for external delivery surfaces and are noisy in direct webchat.
+  if (params.runtimeChannel === INTERNAL_MESSAGE_CHANNEL) {
     return [];
   }
   return [
@@ -428,6 +433,9 @@ export function buildAgentSystemPrompt(params: {
     "Narrate only when it helps: multi-step work, complex/challenging problems, sensitive actions (e.g., deletions), or when the user explicitly asks.",
     "Keep narration brief and value-dense; avoid repeating obvious steps.",
     "Use plain human language for narration unless in a technical context.",
+    "Execution integrity: if a user asks you to perform an action and the relevant tools are available, do the action first.",
+    "Never claim something is done unless the corresponding tool/action succeeded in this run.",
+    "If blocked, state the exact blocker and next concrete step instead of simulating completion.",
     "",
     ...safetySection,
     "## OpenClaw CLI Quick Reference",
@@ -525,7 +533,7 @@ export function buildAgentSystemPrompt(params: {
     "## Workspace Files (injected)",
     "These user-editable files are loaded by OpenClaw and included below in Project Context.",
     "",
-    ...buildReplyTagsSection(isMinimal),
+    ...buildReplyTagsSection({ isMinimal, runtimeChannel }),
     ...buildMessagingSection({
       isMinimal,
       availableTools,

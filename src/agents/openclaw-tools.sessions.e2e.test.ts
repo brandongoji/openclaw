@@ -782,9 +782,10 @@ describe("sessions tools", () => {
         status?: string;
         text?: string;
       };
+      console.log(details.text);
       expect(details.status).toBe("ok");
-      expect(details.text).toContain("tokens 1k (in 12 / out 1k)");
-      expect(details.text).toContain("prompt/cache 197k");
+      expect(details.text).toContain("io 1k (in 12 / out 1k)");
+      expect(details.text).toContain("prompt/cache 196k");
       expect(details.text).not.toContain("1.0k io");
     } finally {
       loadSessionStoreSpy.mockRestore();

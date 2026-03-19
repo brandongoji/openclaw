@@ -507,7 +507,7 @@ export function renderChat(props: ChatProps) {
               ?disabled=${!props.connected}
               @click=${props.onSend}
             >
-              ${isBusy ? "Queue" : "Send"}<kbd class="btn-kbd">â†µ</kbd>
+              ${isBusy ? "Queue" : "Send"}<kbd class="btn-kbd">↵</kbd>
             </button>
           </div>
         </div>

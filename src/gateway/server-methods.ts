@@ -14,6 +14,7 @@ import { healthHandlers } from "./server-methods/health.js";
 import { logsHandlers } from "./server-methods/logs.js";
 import { modelsHandlers } from "./server-methods/models.js";
 import { moonshineHandlers } from "./server-methods/moonshine.js";
+import { parakeetHandlers } from "./server-methods/parakeet.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
 import { sendHandlers } from "./server-methods/send.js";
 import { sessionsHandlers } from "./server-methods/sessions.js";
@@ -98,6 +99,7 @@ const WRITE_METHODS = new Set([
   "browser.request",
   "moonshine.transcribe",
   "whisper.transcribe",
+  "parakeet.transcribe",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
@@ -186,6 +188,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...modelsHandlers,
   ...moonshineHandlers,
   ...whisperHandlers,
+  ...parakeetHandlers,
   ...configHandlers,
   ...wizardHandlers,
   ...talkHandlers,
