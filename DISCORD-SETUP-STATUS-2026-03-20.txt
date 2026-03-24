@@ -1,0 +1,24 @@
+Discord setup status for Hagios 1
+Timestamp: 2026-03-20 05:36 EDT
+
+What I changed
+- Backed up: /Users/hagios/Documents/Hagios 1/state/openclaw.json.pre-discord-merge-20260320-053615.bak
+- Updated: /Users/hagios/Documents/Hagios 1/state/openclaw.json
+  - copied in channels.discord from staged import
+  - enabled plugins.entries.discord
+  - copied Discord bindings from staged import
+  - removed one duplicate Discord binding
+
+What I found
+- Hagios 1 live config had no Discord channel config before this.
+- Staged import at /Users/hagios/Documents/Hagios 1/state/import-from-haggis-original/personal-state/openclaw.json contains a Discord bot token/config and guild bindings.
+- Current Hagios 1 browser profile already has local browser state, but the staged import browser profile did not contain a Cookies DB to reuse for Discord login. No browser session data was applied.
+
+Current result
+- On disk, Hagios 1 now appears configured for Discord.
+- Running gateway/agent process for ai.hagios.1 is active, but I did not restart it. It may still be using the old in-memory config until restarted/relaunched.
+
+Next manual check
+1) Restart/relaunch Hagios 1 OpenClaw so it reloads /Users/hagios/Documents/Hagios 1/state/openclaw.json
+2) Verify the Discord bot/account comes online and responds in the configured guild(s)
+3) If it does not appear, inspect Hagios 1 logs for Discord plugin startup/auth errors

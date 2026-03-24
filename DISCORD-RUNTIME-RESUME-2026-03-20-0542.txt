@@ -1,0 +1,36 @@
+Hagios 1 Discord/runtime resume
+Timestamp: 2026-03-20 05:42 EDT
+
+What I verified
+- Hagios 1 runtime uses:
+  - start script: /Users/hagios/Documents/Hagios 1/start-hagios-1.sh
+  - LaunchAgent: /Users/hagios/Library/LaunchAgents/ai.hagios.1.plist
+  - wrapper: /Users/hagios/hagios1-launch.sh
+  - state: /Users/hagios/Documents/Hagios 1/state
+  - logs: /Users/hagios/Documents/Hagios 1/logs/launchd.out.log and launchd.err.log
+- Current config on disk includes enabled Discord plugin/channel/bindings.
+
+What I did
+- Backed up:
+  - /Users/hagios/Library/LaunchAgents/ai.hagios.1.plist.bak-20260320-0540
+  - /Users/hagios/hagios1-launch.sh.bak-20260320-0540
+- Updated LaunchAgent to use the space-safe wrapper path again.
+- Rewrote /Users/hagios/hagios1-launch.sh as a tiny wrapper that execs the canonical Hagios 1 start script.
+- Relaunched Hagios 1 manually via:
+  - nohup /bin/zsh '/Users/hagios/hagios1-launch.sh' >> '/Users/hagios/Documents/Hagios 1/logs/launchd.out.log' 2>> '/Users/hagios/Documents/Hagios 1/logs/launchd.err.log' &
+
+Current result
+- Hagios 1 gateway is running as PID 68598.
+- Discord started successfully and logged in.
+- Confirmed in logs:
+  - 2026-03-20T05:42:24 [discord] [primary] starting provider (@Hagios)
+  - 2026-03-20T05:42:25 [discord] logged in to discord as 1473413848433426597 (Hagios)
+
+Meaning of "not need gateways all the time" for Hagios 1
+- Safest interpretation: Hagios 1 should keep using its own local OpenClaw gateway, and startup should be automatic/persistent so you do not have to manually babysit reconnects.
+- I did NOT remove gateway/auth architecture.
+- Practical change made: restored a stable wrapper-based launch path so the local Hagios 1 gateway can be started the same way every time and is less brittle around the space-containing path.
+
+Caveat
+- launchd still showed stale/odd restart behavior while I was cleaning it up, but the wrapper itself works and the live Hagios 1 process is now up with Discord logged in.
+- If you want, the next cleanup step later would be a focused launchd-only audit to eliminate the stale 127/old-path noise entirely without changing auth/safety.

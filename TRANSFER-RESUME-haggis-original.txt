@@ -1,0 +1,14 @@
+Status: completed initial safe import from read-only flash-drive source.
+
+Completed:
+- copied custom skill autonomous-observer
+- copied custom skill parakeet-local-stt (excluding bundled scripts/.venv Windows virtualenv)
+- archived MEMORY.md plus 4 daily memory markdown files into workspace/old-memories
+- staged personal OpenClaw state under state/import-from-haggis-original/personal-state
+- started separate copy of browser/openclaw/user-data because it is large
+
+Do next:
+- verify browser user-data copy completion before assuming it is available
+- manually diff staged config/state against current live Hagios 1 state
+- selectively merge secrets, devices, cron jobs, queued deliveries, and browser data only if still needed
+- smoke-test imported skills; rebuild parakeet-local-stt runtime on Mac if needed
