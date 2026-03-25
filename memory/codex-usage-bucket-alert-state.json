@@ -1,7 +1,11 @@
 {
   "label": "weekly",
-  "last_alerted_at": null,
-  "last_alerted_bucket": 60,
-  "last_checked_at": "2026-03-24T05:35:17.147612+00:00",
-  "last_seen_percent_remaining": 63.0
+  "last_alerted_at": "2026-03-24T07:41:02.245893+00:00",
+  "last_alerted_bucket": 50,
+  "last_checked_at": "2026-03-24T07:41:02.245893+00:00",
+  "last_seen_percent_remaining": 58.0,
+  "threshold_alerts": {
+    "red10": false,
+    "warn25": false
+  }
 }
