@@ -1,0 +1,28 @@
+# Private/local runtime state
+state/
+**/state/
+
+# Personal memory/task state
+memory/*.json
+memory/*-state.json
+memory/TASKS.md
+memory/tasks.md
+memory/*task*.md
+memory/*Task*.md
+memory/Hagios Stay on Task Personal Info.md
+
+# Local media/cache/logs
+*.log
+logs/
+cache/
+
+# OpenClaw/local backups and secrets
+*.bak
+*.backup
+.env
+.env.*
+*token*
+*secret*
+
+# Discord/OpenClaw inbound media captures
+state/media/

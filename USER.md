@@ -1,17 +1,6 @@
-# USER.md - About Your Human
+# USER.md
 
-_Learn about the person you're helping. Update this as you go._
-
-- **Name:**
-- **What to call them:**
-- **Pronouns:** _(optional)_
-- **Timezone:**
-- **Notes:**
-
-## Context
-
-_(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)_
-
----
-
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+- Prefers custom functionality as OpenClaw skills when practical instead of core patches
+- Wants cross-platform skill work by default when reasonable
+- Calls collaborative skill building "vibe coding"
+- Current priority can override the above when immediate local patching is explicitly requested
