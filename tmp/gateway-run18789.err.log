@@ -1,0 +1,9 @@
+2026-02-15T23:58:16.972Z [bonjour] gateway name conflict resolved; newName="DESKTOP-L5DVTJK (OpenClaw) (2)"
+2026-02-15T23:58:16.982Z [bonjour] gateway hostname conflict resolved; newHostname="openclaw-(2)"
+2026-02-15T23:59:27.686Z [diagnostic] lane task error: lane=main durationMs=16069 error="FailoverError: ⚠️ API rate limit reached. Please try again later."
+2026-02-15T23:59:27.690Z [diagnostic] lane task error: lane=session:agent:main:main durationMs=16081 error="FailoverError: ⚠️ API rate limit reached. Please try again later."
+2026-02-15T23:59:31.076Z [diagnostic] lane task error: lane=main durationMs=3364 error="FailoverError: ⚠️ API rate limit reached. Please try again later."
+2026-02-15T23:59:31.083Z [diagnostic] lane task error: lane=session:agent:main:main durationMs=3377 error="FailoverError: ⚠️ API rate limit reached. Please try again later."
+2026-02-15T23:59:37.335Z [diagnostic] lane task error: lane=main durationMs=6219 error="FailoverError: ⚠️ API rate limit reached. Please try again later."
+2026-02-15T23:59:37.339Z [diagnostic] lane task error: lane=session:agent:main:main durationMs=6239 error="FailoverError: ⚠️ API rate limit reached. Please try again later."
+2026-02-15T18:59:37.344-05:00 Embedded agent failed before reply: All models failed (3): google/gemini-3-flash-preview: ⚠️ API rate limit reached. Please try again later. (rate_limit) | openai/gpt-5.1-codex: ⚠️ API rate limit reached. Please try again later. (rate_limit) | openai/gpt-4.1-mini: ⚠️ API rate limit reached. Please try again later. (rate_limit)

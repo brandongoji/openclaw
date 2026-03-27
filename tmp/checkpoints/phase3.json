@@ -1,0 +1,14 @@
+{
+  "phase": "phase3",
+  "capturedAt": "2026-02-16T01:49:38.709Z",
+  "upstream": {
+    "provider": "openai",
+    "model": "gpt-5.1-codex",
+    "messageSnippet": "You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: [url]"
+  },
+  "classification": {
+    "bucket": "A",
+    "label": "OpenAI API key quota/billing (insufficient_quota)",
+    "evidence": "openai-test.jsonl assistant errorMessage contains quota/billing guidance"
+  }
+}
