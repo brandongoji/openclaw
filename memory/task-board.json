@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Set up GitHub online checkpoints",
+      "status": "open",
+      "priority": "high",
+      "importance": 5,
+      "created_at": "2026-03-25T15:15:39Z",
+      "updated_at": "2026-03-25T15:15:39Z",
+      "created_stamp": "03/25/2026 11:15 AM",
+      "stamp": "03/25/2026 11:15 AM",
+      "manual_order": 2,
+      "remind_after": null,
+      "notes": null,
+      "history": [
+        {
+          "at": "2026-03-25T15:15:39Z",
+          "action": "added",
+          "note": null
+        }
+      ],
+      "token_cost": "high",
+      "token_cost_rank": 3.0,
+      "topic": "general"
+    },
+    {
+      "id": 2,
+      "title": "Design Hagios flow app UI",
+      "status": "open",
+      "priority": "medium",
+      "importance": 4,
+      "created_at": "2026-03-25T15:15:39Z",
+      "updated_at": "2026-03-25T15:16:38Z",
+      "created_stamp": "03/25/2026 11:15 AM",
+      "stamp": "03/25/2026 11:16 AM",
+      "manual_order": 1,
+      "remind_after": null,
+      "notes": null,
+      "history": [
+        {
+          "at": "2026-03-25T15:15:39Z",
+          "action": "added",
+          "note": null
+        },
+        {
+          "at": "2026-03-25T15:15:48Z",
+          "action": "updated",
+          "note": "importance, token_cost"
+        },
+        {
+          "at": "2026-03-25T15:16:00Z",
+          "action": "reprioritized",
+          "note": "order=2"
+        },
+        {
+          "at": "2026-03-25T15:16:38Z",
+          "action": "reprioritized",
+          "note": "order=1"
+        }
+      ],
+      "token_cost": "low",
+      "token_cost_rank": 1.0,
+      "topic": "general"
+    },
+    {
+      "id": 3,
+      "title": "Launch Lawes Marketing as a lean web design service business",
+      "status": "open",
+      "topic": "business",
+      "priority": "high",
+      "importance": 5,
+      "created_at": "2026-03-25T16:31:24Z",
+      "updated_at": "2026-03-25T16:31:24Z",
+      "created_stamp": "03/25/2026 12:31 PM",
+      "stamp": "03/25/2026 12:31 PM",
+      "manual_order": 3,
+      "remind_after": null,
+      "notes": "Owner/Creative Director model, delegated delivery team, disability-friendly workload",
+      "history": [
+        {
+          "at": "2026-03-25T16:31:24Z",
+          "action": "added",
+          "note": "Owner/Creative Director model, delegated delivery team, disability-friendly workload"
+        }
+      ],
+      "token_cost": "medium",
+      "token_cost_rank": 2.0
+    },
+    {
+      "id": 4,
+      "title": "Create lead gen plan: Craigslist ads + commission-based cold caller sourcing",
+      "status": "open",
+      "topic": "business",
+      "priority": "high",
+      "importance": 4,
+      "created_at": "2026-03-25T16:31:24Z",
+      "updated_at": "2026-03-25T16:31:24Z",
+      "created_stamp": "03/25/2026 12:31 PM",
+      "stamp": "03/25/2026 12:31 PM",
+      "manual_order": 4,
+      "remind_after": null,
+      "notes": "Source callers via Freelancer/Upwork, script + KPIs + commission structure",
+      "history": [
+        {
+          "at": "2026-03-25T16:31:24Z",
+          "action": "added",
+          "note": "Source callers via Freelancer/Upwork, script + KPIs + commission structure"
+        }
+      ],
+      "token_cost": "low",
+      "token_cost_rank": 1.0
+    },
+    {
+      "id": 5,
+      "title": "Build and launch Lawes Marketing ops system (site + intake + automations + hiring workflow)",
+      "status": "open",
+      "topic": "business",
+      "priority": "high",
+      "importance": 5,
+      "created_at": "2026-03-25T16:35:00Z",
+      "updated_at": "2026-03-25T16:35:00Z",
+      "created_stamp": "03/25/2026 12:35 PM",
+      "stamp": "03/25/2026 12:35 PM",
+      "manual_order": 5,
+      "remind_after": null,
+      "notes": "Owner/CEO/Creative Director model with delegated delivery; keep workload health-friendly.",
+      "history": [
+        {
+          "at": "2026-03-25T16:35:00Z",
+          "action": "added",
+          "note": "Expanded from business planning into execution system build."
+        }
+      ],
+      "token_cost": "medium",
+      "token_cost_rank": 2.0
+    },
+    {
+      "id": 6,
+      "title": "Plan task sync from Stay on Task into Hagios Flow notes",
+      "status": "open",
+      "topic": "product",
+      "priority": "medium",
+      "importance": 4,
+      "created_at": "2026-03-25T16:42:26Z",
+      "updated_at": "2026-03-25T16:42:26Z",
+      "created_stamp": "03/25/2026 12:42 PM",
+      "stamp": "03/25/2026 12:42 PM",
+      "manual_order": 6,
+      "remind_after": "2026-03-26T16:42:26Z",
+      "notes": "Future: save/bridge task board into Hagios Flow note-taking software",
+      "history": [
+        {
+          "at": "2026-03-25T16:42:26Z",
+          "action": "added",
+          "note": "Future: save/bridge task board into Hagios Flow note-taking software"
+        }
+      ],
+      "token_cost": "low",
+      "token_cost_rank": 1.0
+    },
+    {
+      "id": 7,
+      "title": "Safe mode ends: Codex weekly budget renew checkpoint",
+      "status": "open",
+      "topic": "usage",
+      "priority": "high",
+      "importance": 5,
+      "created_at": "2026-03-25T16:43:52Z",
+      "updated_at": "2026-03-25T16:43:52Z",
+      "created_stamp": "03/25/2026 12:43 PM",
+      "stamp": "03/25/2026 12:43 PM",
+      "manual_order": 7,
+      "remind_after": "2026-03-29T16:43:00Z",
+      "notes": "When weekly Codex renews, exit safe mode and resume heavier tasks.",
+      "history": [
+        {
+          "at": "2026-03-25T16:43:52Z",
+          "action": "added",
+          "note": "When weekly Codex renews, exit safe mode and resume heavier tasks."
+        }
+      ],
+      "token_cost": "low",
+      "token_cost_rank": 1.0
+    },
+    {
+      "id": 8,
+      "title": "OpenClaw chat UI design implementation (based on saved design photo)",
+      "status": "open",
+      "topic": "product",
+      "priority": "high",
+      "importance": 5,
+      "created_at": "2026-03-25T17:06:02Z",
+      "updated_at": "2026-03-25T17:06:02Z",
+      "created_stamp": "03/25/2026 01:06 PM",
+      "stamp": "03/25/2026 01:06 PM",
+      "manual_order": 8,
+      "remind_after": null,
+      "notes": "Design reference image is in images/hagios-openclaw-designs/ and represents current UI direction.",
+      "history": [
+        {
+          "at": "2026-03-25T17:06:02Z",
+          "action": "added",
+          "note": "Design reference image is in images/hagios-openclaw-designs/ and represents current UI direction."
+        }
+      ],
+      "token_cost": "medium",
+      "token_cost_rank": 2.0
+    },
+    {
+      "id": 9,
+      "title": "Build transcriber pipeline for podcasts/social audio to create private business knowledge assistants",
+      "status": "open",
+      "topic": "product",
+      "priority": "medium",
+      "importance": 4,
+      "created_at": "2026-03-25T18:29:59Z",
+      "updated_at": "2026-03-25T18:29:59Z",
+      "created_stamp": "03/25/2026 02:29 PM",
+      "stamp": "03/25/2026 02:29 PM",
+      "manual_order": 9,
+      "remind_after": null,
+      "notes": null,
+      "history": [
+        {
+          "at": "2026-03-25T18:29:59Z",
+          "action": "added",
+          "note": null
+        }
+      ],
+      "token_cost": "medium",
+      "token_cost_rank": 2.0
+    },
+    {
+      "id": 10,
+      "title": "Debug Discord yes/no consistency issues",
+      "status": "open",
+      "topic": "product",
+      "priority": "medium",
+      "importance": 4,
+      "created_at": "2026-03-27T21:00:00Z",
+      "updated_at": "2026-03-27T21:00:00Z",
+      "created_stamp": "03/27/2026 05:00 PM",
+      "stamp": "03/27/2026 05:00 PM",
+      "manual_order": 10,
+      "remind_after": null,
+      "notes": "Track inconsistent yes/no handling in Discord replies and related control-channel behavior.",
+      "history": [
+        {
+          "at": "2026-03-27T21:00:00Z",
+          "action": "added",
+          "note": "Discord consistency issues"
+        }
+      ],
+      "token_cost": "low",
+      "token_cost_rank": 1.0
+    }
+  ]
+}
