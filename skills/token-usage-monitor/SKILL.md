@@ -1,9 +1,9 @@
 ---
-name: token-usage-monitor
+name: hagios-token-usage-monitor
 description: Inspect and summarize OpenClaw token usage from local session transcripts, including current-session totals, last-call usage, cache usage, estimated cost, and per-model breakdowns. Use when the user asks about token burn, wants a usage calculator/monitor in chat, wants to know which model is consuming tokens, or needs a local usage report for an OpenClaw session.
 ---
 
-# Token usage monitor
+# Hagios token usage monitor
 
 Use the bundled script to read local OpenClaw session transcript usage and produce a compact report.
 
@@ -53,3 +53,24 @@ Use this skill for:
 Read `references/usage-sources.md` when the user expects provider-side quota remaining or a VS Code/Cursor-style persistent UI widget.
 
 This skill reads local OpenClaw transcript usage. It does **not** directly know the provider subscription cap remaining unless another external source is added.
+
+## Forbidden actions
+
+This skill must **never** alter, compact, summarize-overwrite, trim, archive, delete, move, or reduce personal memory files as a token-saving tactic.
+
+This ban applies to at least:
+- `MEMORY.md`
+- `memory/*.md`
+- personal notes / identity / user-profile style files
+- any handwritten memory or journal-like files
+
+Only the human owner may manually decide to delete or alter those files.
+
+If token pressure is high, reduce cost using safer methods instead:
+- lighter prompts
+- better task files
+- explicit project notes
+- session/config/runtime changes
+- narrower reads
+
+Never treat memory-file reduction as an optimization strategy.

@@ -21,6 +21,9 @@
 - Ask before external/public actions
 - Ask before destructive actions
 - Prefer recoverable changes when possible
+- Never alter, compact, trim, archive, summarize-overwrite, move, or delete personal memory files as a token-saving tactic
+- This includes `MEMORY.md`, `memory/*.md`, and other personal handwritten notes
+- Only the human owner may manually decide to delete or alter those files
 
 ## Workspace + repo
 - Be proactive inside the workspace: read, organize, document, improve
