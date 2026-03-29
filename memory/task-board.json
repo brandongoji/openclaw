@@ -279,6 +279,30 @@
       ],
       "token_cost": "medium",
       "token_cost_rank": 2.0
+    },
+    {
+      "id": 12,
+      "title": "Rework TellMeMo into local transcriber (Whisper + speaker recognition) with BYOK AI login flow",
+      "status": "open",
+      "topic": "product",
+      "priority": "high",
+      "importance": 5,
+      "created_at": "2026-03-29T20:36:12Z",
+      "updated_at": "2026-03-29T20:36:12Z",
+      "created_stamp": "03/29/2026 04:36 PM",
+      "stamp": "03/29/2026 04:36 PM",
+      "manual_order": 12,
+      "remind_after": null,
+      "notes": "User wants local transcription + speaker diarization; AI features should use BYOK keys and not require HF token just to boot/login.",
+      "history": [
+        {
+          "at": "2026-03-29T20:36:12Z",
+          "action": "added",
+          "note": "Added from control-ui request to save in Hagios 1 todo list."
+        }
+      ],
+      "token_cost": "high",
+      "token_cost_rank": 3.0
     }
   ]
 }

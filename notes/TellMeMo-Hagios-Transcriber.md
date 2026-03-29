@@ -1,6 +1,6 @@
 # TellMeMo / Hagios Transcriber
 
-_Last updated: 2026-03-28 America/Detroit_
+_Last updated: 2026-03-29 America/Detroit_
 
 ## Mission
 Run a Mac-hosted TellMeMo staging stack that your dev team can actually use, connect a custom Android APK to that stack for internal testing, and keep the Hagios Transcriber subsystem documented as a nested note.
@@ -73,3 +73,11 @@ If ripgrep exists:
 cd "/Users/hagios/Documents/Hagios 2/workspace/projects/tellmemo-app"
 rg -n -i 'transcrib|whisper|assemblyai|audio|speech|faster-whisper|deepgram|openai|queue|worker' backend .env* docker-compose* infra lib
 ```
+
+### T6 — Local-first transcriber + BYOK architecture
+Status: open
+- remove/patch startup hard requirement for HF EmbeddingGemma so app can boot and login without HF token
+- use local Whisper transcription path by default (faster-whisper/whisper runtime on host or container)
+- add speaker diarization + speaker labeling path for transcript segments
+- keep AI features BYOK-driven (user-provided key in app settings; no mandatory platform key)
+- document persistence/caching so local models survive restarts
