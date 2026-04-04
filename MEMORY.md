@@ -6,6 +6,10 @@
 - Preserve OpenClaw core behavior in Hagios 1 where possible; use skill-only customization for new features.
 - If cross-instance handoffs are sent, include explicit identity (for example: `From: Hagios 1`).
 - Prefer low-token handoff channels over browser/Playwright UI interaction for routine delegation.
+- Hagios 1 continuity should track the Samsung USB source-of-truth identity files (`IDENTITY.md`, `SOUL.md`, `USER.md`) unless Brandon intentionally changes the local persona.
+- Ollama/local models may be installed and manually selected for specific tasks, but treating Ollama as the automatic main default is a regression unless Brandon explicitly requests it.
+- Keep the main default model on a non-Ollama provider; current expected default is `openai-codex/gpt-5.4` unless Brandon intentionally picks another non-Ollama default.
+- Keep **Hagios Pal** isolated from the main/private control identity; routing the `pals` account into `main` is a regression.
 
 ## Project Direction
 
