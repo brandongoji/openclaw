@@ -1,5 +1,6 @@
 # USER.md
 
+- Name: Brandon
 - Prefers custom functionality as OpenClaw skills when practical instead of core patches
 - Wants cross-platform skill work by default when reasonable
 - Calls collaborative skill building "vibe coding"
