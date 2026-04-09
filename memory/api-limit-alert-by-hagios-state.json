@@ -3,24 +3,28 @@
   "windows": {
     "5h": {
       "label": "5h",
-      "last_alerted_at": "2026-03-24T08:27:15.070014+00:00",
+      "last_alerted_at": "2026-04-08T21:38:19.814756+00:00",
       "last_alerted_bucket": 50,
-      "last_checked_at": "2026-03-24T08:27:15.070014+00:00",
-      "last_seen_percent_remaining": 58.0,
+      "last_checked_at": "2026-04-08T21:41:49.832609+00:00",
+      "last_seen_percent_remaining": 56.0,
       "threshold_alerts": {
         "red10": false,
-        "warn25": false
+        "warn25": false,
+        "weekly15": false,
+        "weekly20": false
       }
     },
     "weekly": {
       "label": "weekly",
-      "last_alerted_at": "2026-03-24T08:10:56.586443+00:00",
-      "last_alerted_bucket": 40,
-      "last_checked_at": "2026-03-24T08:27:15.105274+00:00",
-      "last_seen_percent_remaining": 45.0,
+      "last_alerted_at": "2026-04-08T21:38:19.858144+00:00",
+      "last_alerted_bucket": 30,
+      "last_checked_at": "2026-04-08T21:41:49.873066+00:00",
+      "last_seen_percent_remaining": 33.0,
       "threshold_alerts": {
         "red10": false,
-        "warn25": false
+        "warn25": false,
+        "weekly15": false,
+        "weekly20": false
       }
     }
   }

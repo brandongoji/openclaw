@@ -98,7 +98,8 @@ export function renderApp(state: AppViewState) {
   const chatAvatarUrl = state.chatAvatarUrl ?? assistantAvatarUrl ?? null;
   const configValue =
     state.configForm ?? (state.configSnapshot?.config as Record<string, unknown> | null);
-  const basePath = normalizeBasePath(state.basePath ?? "");  const resolvedAgentId =
+  const basePath = normalizeBasePath(state.basePath ?? "");
+  const resolvedAgentId =
     state.agentsSelectedId ??
     state.agentsList?.defaultId ??
     state.agentsList?.agents?.[0]?.id ??
@@ -122,11 +123,11 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-              <img src=${basePath ? `${basePath}/favicon.svg` : "/favicon.svg"} alt="OpenClaw" />
+              <img src=${basePath ? `${basePath}/favicon.svg` : "/favicon.svg"} alt="Hagios 1" />
             </div>
             <div class="brand-text">
-              <div class="brand-title">Hagios Original</div>
-              <div class="brand-sub">Gateway Dashboard, pwrd by openclaw</div>
+              <div class="brand-title">Hagios 1</div>
+              <div class="brand-sub">Gateway Dashboard</div>
             </div>
           </div>
         </div>
@@ -146,7 +147,9 @@ export function renderApp(state: AppViewState) {
             title="Pan tabs left"
             @click=${() => {
               const navEl = state.renderRoot?.querySelector(".nav-scroll") as HTMLElement | null;
-              if (!navEl) return;
+              if (!navEl) {
+                return;
+              }
               if (navEl.scrollWidth > navEl.clientWidth) {
                 navEl.scrollBy({ left: -220, behavior: "smooth" });
               } else {
@@ -161,7 +164,9 @@ export function renderApp(state: AppViewState) {
             title="Pan tabs right"
             @click=${() => {
               const navEl = state.renderRoot?.querySelector(".nav-scroll") as HTMLElement | null;
-              if (!navEl) return;
+              if (!navEl) {
+                return;
+              }
               if (navEl.scrollWidth > navEl.clientWidth) {
                 navEl.scrollBy({ left: 220, behavior: "smooth" });
               } else {
@@ -989,9 +994,3 @@ export function renderApp(state: AppViewState) {
     </div>
   `;
 }
-
-
-
-
-
-

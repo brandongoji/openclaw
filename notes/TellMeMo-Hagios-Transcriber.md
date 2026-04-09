@@ -1,83 +1,83 @@
-# TellMeMo / Hagios Transcriber
+# TellMeMo emulator microphone + network notes
 
-_Last updated: 2026-03-29 America/Detroit_
+## Required launcher
 
-## Mission
-Run a Mac-hosted TellMeMo staging stack that your dev team can actually use, connect a custom Android APK to that stack for internal testing, and keep the Hagios Transcriber subsystem documented as a nested note.
-
-## Relationship to Hagios 1 task system
-- Main notes index: `notes/MAIN-TASKS.md`
-- Task list: `memory/task-board.json`
-- Source project in Hagios 2: `projects/tellmemo-app/TODO.md`
-- Source deep note in Hagios 2: `projects/tellmemo-app/notes/transcriber-notes.md`
-
-## Recovered context
-- Hagios 1 previously had a task-board item for:
-  - `Build transcriber pipeline for podcasts/social audio to create private business knowledge assistants`
-- TellMeMo work already recovered in Hagios 2 includes:
-  - Mac-hosted staging deployment files
-  - Android scaffold + debug APK artifacts
-  - build-time config path for a custom API base URL
-- Current shell blockers last seen:
-  - `flutter` not on PATH
-  - `docker` not on PATH
-
-## Core assumptions
-- Do not assume the APK will ask for an IP/server URL.
-- Prefer a custom APK pointed at a staging HTTPS host.
-- Best likely access path is Cloudflare Tunnel first, then Tailscale, then direct public exposure only if necessary.
-- Parent app deployment planning belongs with TellMeMo; subsystem-specific transcription planning belongs here.
-
-## Specific todo list
-
-### T1 — Confirm transcription dependency path
-Status: open
-- inspect backend config/env usage for transcription provider keys and URLs
-- identify whether self-hosted transcription is already supported
-- document expected request/response shape if found
-
-### T2 — Define Mac-as-server transcription plan
-Status: open
-- choose Cloudflare Tunnel / Tailscale / direct public model
-- map external hostname to backend/reverse-proxy path
-- decide whether the transcriber runs in Docker on the Mac or stays external
-
-### T3 — Validate long-audio operational risks
-Status: open
-- note Mac sleep/App Nap requirements
-- note Docker resource requirements
-- note upload/websocket/proxy timeout risks
-- note model caching / persistent volume needs if local transcription is used
-
-### T4 — Confirm Android-to-server contract
-Status: open
-- verify build-time `API_BASE_URL` path in Flutter app
-- verify HTTPS requirement
-- verify microphone/upload/transcription flow assumptions
-
-### T5 — Keep resume checklist current
-Status: active
-- append confirmed provider/runtime details after each meaningful step
-- append exact commands/paths after each meaningful step
-- keep this file resumable without rereading whole chats
-
-## Short VS Code task pack
-```bash
-cd "/Users/hagios/Documents/Hagios 2/workspace/projects/tellmemo-app"
-find backend -maxdepth 3 -type f | sort | grep -Ei 'env|config|settings|transcrib|whisper|assembly|audio|worker|queue'
-```
-
-If ripgrep exists:
+Use:
 
 ```bash
-cd "/Users/hagios/Documents/Hagios 2/workspace/projects/tellmemo-app"
-rg -n -i 'transcrib|whisper|assemblyai|audio|speech|faster-whisper|deepgram|openai|queue|worker' backend .env* docker-compose* infra lib
+~/bin/run-tellmemo-avd.sh
 ```
 
-### T6 — Local-first transcriber + BYOK architecture
-Status: open
-- remove/patch startup hard requirement for HF EmbeddingGemma so app can boot and login without HF token
-- use local Whisper transcription path by default (faster-whisper/whisper runtime on host or container)
-- add speaker diarization + speaker labeling path for transcript segments
-- keep AI features BYOK-driven (user-provided key in app settings; no mandatory platform key)
-- document persistence/caching so local models survive restarts
+This guarantees `tellmemo-avd` starts with:
+
+- `-allow-host-audio`
+
+Without that flag, the Android emulator records silence/zeroed input even though the app thinks recording started.
+
+## If TellMeMo still hears nothing
+
+Check macOS microphone permission:
+
+- System Settings → Privacy & Security → Microphone
+- Allow microphone access for:
+  - Android Emulator
+  - and, if present, QEMU / `qemu-system-aarch64`
+
+Then fully relaunch the emulator with:
+
+```bash
+~/bin/run-tellmemo-avd.sh
+```
+
+## If TellMeMo says network/login failed
+
+Check the origin before blaming emulator Wi-Fi:
+
+```bash
+curl -sS http://localhost:8000/api/v1/healthz
+curl -sS https://emulator.hagios.cc/api/v1/healthz
+```
+
+Interpretation:
+
+- `localhost:8000` failing means the local TellMeMo stack is down or still warming up.
+- `emulator.hagios.cc` returning Cloudflare `502` while emulator internet otherwise works means Cloudflare Tunnel is alive but the Mac origin behind it is unavailable.
+- In that case, this is **not** primarily an emulator network bug.
+
+The launcher now warns about this case and opens Docker Desktop if the Docker socket is missing.
+
+## Verification
+
+1. Launch emulator with the helper.
+2. If the helper warns that the local backend is down, wait for Docker/TellMeMo to recover first.
+3. Open TellMeMo.
+4. For mic testing, start a recording and speak for 3–5 seconds.
+5. Confirm the resulting upload is no longer described as `0-second audio`.
+6. For network testing, confirm `https://emulator.hagios.cc/api/v1/healthz` returns JSON and login/signup no longer throws a generic network error.
+
+## Known findings
+
+- App-level `RECORD_AUDIO` permission was granted.
+- TellMeMo recording + upload pipeline starts and stops correctly.
+- Empty transcription after a successful upload points to host audio not reaching the emulator.
+- Missing `-allow-host-audio` was one cause and is now handled by the launcher helper.
+- If the issue persists after using the helper, macOS mic permission for the emulator process is the next likely blocker.
+- Separate network finding (2026-04-04): the flaky/failed emulator path was caused by the local TellMeMo origin being unavailable (`localhost:80` / `localhost:8000` down) while `cloudflared` was still running. That presents externally as Cloudflare `502` on `https://emulator.hagios.cc/...` even when general emulator internet is fine.
+
+## Current microphone diagnosis (2026-04-04)
+
+Observed:
+
+- Emulator is booted and `-allow-host-audio` is active.
+- Android `RECORD_AUDIO` permission is granted and foreground appops are allowed.
+- TellMeMo requests audio focus normally during recording.
+- The app still does not appear to access the microphone path reliably from the host.
+
+Likely causes still worth checking:
+
+1. macOS microphone privacy permission for Android Emulator/QEMU is still missing or stuck.
+2. The emulator may be using a host audio path that is present but not mapped to the selected input device.
+3. The TellMeMo app may be opening the recorder but receiving silence from the host audio bridge.
+4. Another audio app or system privacy layer may be intercepting mic access.
+5. The emulator may need a fresh relaunch after privacy changes so macOS re-prompts/refreshes TCC.
+6. If the app can record but transcription remains empty, the issue is in host audio capture rather than Android permissions.
