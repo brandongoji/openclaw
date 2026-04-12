@@ -15,10 +15,22 @@ DEFAULT_STATE_FILE = WORKSPACE / 'memory' / 'api-limit-alert-by-hagios-state.jso
 def load_status_json(status_file: Optional[str]) -> dict:
     if status_file:
         return json.loads(Path(status_file).read_text(encoding='utf-8'))
-    proc = subprocess.run(DEFAULT_STATUS_CMD, capture_output=True, text=True, check=False)
-    if proc.returncode != 0:
-        raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or 'openclaw status --usage --json failed')
-    return json.loads(proc.stdout)
+    try:
+        proc = subprocess.run(DEFAULT_STATUS_CMD, capture_output=True, text=True, check=False, timeout=45)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError('openclaw status --usage --json timed out')
+    if proc.returncode != 0 or not proc.stdout.strip():
+        raise RuntimeError(
+            proc.stderr.strip() or proc.stdout.strip()
+            or 'openclaw status --usage --json returned no output (likely timed out)'
+        )
+    # Handle case where output is an error string rather than JSON
+    try:
+        return json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        raise RuntimeError(
+            f'openclaw status --usage --json returned non-JSON (auth may be expired): {proc.stdout[:200]}'
+        )
 
 
 def normalize_window_label(label: str) -> Optional[str]:
@@ -38,11 +50,14 @@ def normalize_window_label(label: str) -> Optional[str]:
 def extract_target_windows(status_payload: dict, provider_hint: Optional[str]) -> Dict[str, float]:
     usage = status_payload.get('usage') or {}
     providers = usage.get('providers') or []
+    all_providers = providers
     if provider_hint:
         providers = [
             p for p in providers
             if provider_hint.lower() in (str(p.get('provider', '')) + ' ' + str(p.get('displayName', ''))).lower()
         ]
+        if not providers:
+            providers = all_providers
 
     windows: Dict[str, float] = {}
     for provider in providers:
@@ -59,6 +74,28 @@ def extract_target_windows(status_payload: dict, provider_hint: Optional[str]) -
     if missing:
         raise ValueError(f'Could not find usage windows in openclaw status output for: {", ".join(missing)}.')
     return windows
+
+
+def provider_errors(status_payload: dict, provider_hint: Optional[str]) -> List[str]:
+    usage = status_payload.get('usage') or {}
+    providers = usage.get('providers') or []
+    all_providers = providers
+    if provider_hint:
+        providers = [
+            p for p in providers
+            if provider_hint.lower() in (str(p.get('provider', '')) + ' ' + str(p.get('displayName', ''))).lower()
+        ]
+        if not providers:
+            providers = all_providers
+
+    errors: List[str] = []
+    for provider in providers:
+        error = provider.get('error')
+        if not error:
+            continue
+        name = provider.get('displayName') or provider.get('provider') or 'unknown'
+        errors.append(f'{name}: {error}')
+    return errors
 
 
 def run_checker(check_script: str, state_file: str, window_label: str, remaining: float) -> dict:
@@ -88,8 +125,66 @@ def main() -> int:
     parser.add_argument('--json', action='store_true', help='Emit wrapper metadata plus checker result as JSON.')
     args = parser.parse_args()
 
-    status_payload = load_status_json(args.status_file)
-    windows = extract_target_windows(status_payload, args.provider)
+    try:
+        status_payload = load_status_json(args.status_file)
+    except RuntimeError as exc:
+        source_issue = (
+            f'HEARTBEAT_API_USAGE_SOURCE_ERROR: unable to read 5h/weekly usage windows from '
+            f'`openclaw status --usage --json` ({exc}).'
+        )
+        payload = {
+            'ok': True,
+            'source': 'openclaw status --usage --json',
+            'windows': {},
+            'results': [],
+            'alerts': [source_issue],
+            'status': 'source_error',
+        }
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print(source_issue)
+        return 0
+
+    try:
+        windows = extract_target_windows(status_payload, args.provider)
+    except (ValueError, RuntimeError) as exc:
+        errors = provider_errors(status_payload, args.provider)
+        if errors:
+            source_issue = (
+                'HEARTBEAT_API_USAGE_SOURCE_ERROR: unable to read 5h/weekly usage windows from '
+                f'`openclaw status --usage --json` ({"; ".join(errors)}).'
+            )
+            payload = {
+                'ok': True,
+                'source': 'openclaw status --usage --json',
+                'windows': {},
+                'results': [],
+                'alerts': [source_issue],
+                'status': 'source_error',
+            }
+            if args.json:
+                print(json.dumps(payload, indent=2, sort_keys=True))
+            else:
+                print(source_issue)
+            return 0
+        source_issue = (
+            'HEARTBEAT_API_USAGE_SOURCE_ERROR: unable to read `openclaw status --usage --json` '
+            f'({str(exc)}).'
+        )
+        payload = {
+            'ok': True,
+            'source': 'openclaw status --usage --json',
+            'windows': {},
+            'results': [],
+            'alerts': [source_issue],
+            'status': 'source_error',
+        }
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print(source_issue)
+        return 0
     results: List[dict] = []
     alerts: List[str] = []
 

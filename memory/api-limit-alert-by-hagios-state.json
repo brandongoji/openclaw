@@ -1,12 +1,21 @@
 {
+  "_heartbeat_meta": {
+    "source_alerts": {
+      "HEARTBEAT_API_USAGE_SOURCE_ERROR: unable to read 5h/weekly usage windows from `openclaw status --usage --json` (MiniMax: cookie is missing, log in again).": {
+        "count": 4,
+        "last_alert_at": 1775705054,
+        "last_seen_at": 1775705101
+      }
+    }
+  },
   "version": 2,
   "windows": {
     "5h": {
       "label": "5h",
-      "last_alerted_at": "2026-04-08T21:38:19.814756+00:00",
-      "last_alerted_bucket": 50,
-      "last_checked_at": "2026-04-08T21:41:49.832609+00:00",
-      "last_seen_percent_remaining": 56.0,
+      "last_alerted_at": "2026-04-10T04:42:41.158500+00:00",
+      "last_alerted_bucket": 80,
+      "last_checked_at": "2026-04-10T04:42:41.158500+00:00",
+      "last_seen_percent_remaining": 80.0,
       "threshold_alerts": {
         "red10": false,
         "warn25": false,
@@ -16,10 +25,10 @@
     },
     "weekly": {
       "label": "weekly",
-      "last_alerted_at": "2026-04-08T21:38:19.858144+00:00",
-      "last_alerted_bucket": 30,
-      "last_checked_at": "2026-04-08T21:41:49.873066+00:00",
-      "last_seen_percent_remaining": 33.0,
+      "last_alerted_at": "2026-04-10T04:42:41.191907+00:00",
+      "last_alerted_bucket": 90,
+      "last_checked_at": "2026-04-10T04:42:41.191907+00:00",
+      "last_seen_percent_remaining": 90.0,
       "threshold_alerts": {
         "red10": false,
         "warn25": false,
